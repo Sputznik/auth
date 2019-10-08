@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'dart:convert'; // access to jsonEncode()
-import 'dart:io'; // access to File and Directory classes
 import 'package:quill_delta/quill_delta.dart';
 import 'package:zefyr/zefyr.dart';
+
+import 'file.dart';
 
 class EditorPage extends StatefulWidget {
   @override
@@ -28,7 +29,6 @@ class EditorPageState extends State<EditorPage> {
   }
 
   @override
-  @override
   Widget build(BuildContext context) {
     // If _controller is null we show Material Design loader, otherwise
     // display Zefyr editor.
@@ -36,51 +36,81 @@ class EditorPageState extends State<EditorPage> {
         ? Center(child: CircularProgressIndicator())
         : ZefyrScaffold(
       child: ZefyrEditor(
+//        toolbarDelegate: ,
         padding: EdgeInsets.all(16),
         controller: _controller,
         focusNode: _focusNode,
       ),
     );
 
-    return Scaffold(
-      appBar: AppBar(
-        title: Text("Editor page"),
-        actions: <Widget>[
-          Builder(
-            builder: (context) => IconButton(
-              icon: Icon(Icons.save),
-              onPressed: () => _saveDocument(context),
-            ),
-          )
-        ],
+    return WillPopScope(
+      onWillPop: (){
+        print('Back button clicked');
+        Navigator.pop(context,true);
+        return Future<bool>.value(false);
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text("Editor page"),
+          backgroundColor: Colors.red[900],
+//          automaticallyImplyLeading: false,
+          actions: <Widget>[
+            Builder(
+              builder: (context) => IconButton(
+                icon: Icon(Icons.save),
+                onPressed: () => _saveDocument(context),
+              ),
+
+            )
+          ],
+        ),
+        body: body,
       ),
-      body: body,
     );
   }
   /// Loads the document to be edited in Zefyr.
-  Future<NotusDocument> _loadDocument() async {
-    final file = File(Directory.systemTemp.path + "/quick_start.json");
-    if (await file.exists()) {
-      final contents = await file.readAsString();
-      print(jsonDecode(contents));
-      return NotusDocument.fromJson(jsonDecode(contents));
+  Future<NotusDocument> _loadDocument() async{
+    fileHelper helper = fileHelper();
+    final contents = await helper.readFileContents();
+
+    if(contents.length > 0){
+      var json_str = jsonEncode(contents['new_file']);
+      return NotusDocument.fromJson(jsonDecode(json_str));
     }
+
     final Delta delta = Delta()..insert("Zefyr Quick Start\n");
     return NotusDocument.fromDelta(delta);
   }
 
+
+
   void _saveDocument(BuildContext context) {
     // Notus documents can be easily serialized to JSON by passing to
     // `jsonEncode` directly
-    final contents = jsonEncode(_controller.document);
-    // For this example we save our document to a temporary file.
-    final file = File(Directory.systemTemp.path + "/quick_start.json");
-    // And show a snack bar on success.
-    file.writeAsString(contents).then((_) {
-      Scaffold.of(context).showSnackBar(SnackBar(content: Text("Saved.")));
-    });
-  }
 
+    //print( _controller.document.runtimeType );
+
+    fileHelper helper = fileHelper();
+
+    final currentContent = _controller.document.toJson(); //jsonEncode(_controller.document);
+
+    helper.readFileContents().then(( fileContents ){
+
+      fileContents['new_file'] = currentContent;
+
+      helper.writeFileContents(jsonEncode(fileContents)).then((_){
+        Scaffold.of(context).showSnackBar(SnackBar(content: Text("Saved.")));
+      });
+
+      /*
+      var rng = new Random();
+      print(rng.nextInt(10));
+      */
+
+    });
+
+
+  }
 
 
 

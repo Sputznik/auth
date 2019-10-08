@@ -4,7 +4,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 import './zefyr_editor.dart';
-
+import 'archive.dart';
 
 void main() {
   runApp(QuickStartApp());
@@ -15,8 +15,9 @@ class QuickStartApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Quick Start',
-      home: HomePage(),
+      initialRoute: '/',
       routes: {
+        "/": (context) => Archive(),
         "/editor": (context) => EditorPage(),
       },
     );
