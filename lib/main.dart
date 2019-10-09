@@ -5,6 +5,7 @@ import 'package:http/http.dart' as http;
 
 import './zefyr_editor.dart';
 import 'archive.dart';
+import 'json.dart';
 
 void main() {
   runApp(QuickStartApp());
@@ -17,8 +18,8 @@ class QuickStartApp extends StatelessWidget {
       title: 'Quick Start',
       initialRoute: '/',
       routes: {
-        "/": (context) => Archive(),
-        "/editor": (context) => EditorPage(),
+        "/": (context) => JsonConvert(),
+        "/editor": (context) => EditorPage(0),
       },
     );
   }

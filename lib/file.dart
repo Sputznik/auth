@@ -26,3 +26,25 @@ class fileHelper{
   }
 
 }
+
+class post{
+
+  String title;
+
+  var content;
+
+  post(title, content){
+    this.title = title;
+    this.content = content;
+  }
+
+  save() async{
+
+    fileHelper helper = fileHelper();
+
+    helper.readFileContents().then(( fileContents ){
+
+    });
+  }
+
+}

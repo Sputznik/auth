@@ -2,10 +2,18 @@ import 'package:flutter/material.dart';
 import 'dart:convert'; // access to jsonEncode()
 import 'package:quill_delta/quill_delta.dart';
 import 'package:zefyr/zefyr.dart';
+import 'dart:math';
+
 
 import 'file.dart';
 
 class EditorPage extends StatefulWidget {
+  String id;
+
+  EditorPage(id){
+    this.id = id;
+  }
+
   @override
   EditorPageState createState() => EditorPageState();
 }
@@ -26,10 +34,20 @@ class EditorPageState extends State<EditorPage> {
         _controller = ZefyrController(document);
       });
     });
+
+
+
+  }
+
+  String getRandomID(){
+    var rng = new Random();
+    return base64.encode([rng.nextInt(10), rng.nextInt(10)]);
   }
 
   @override
   Widget build(BuildContext context) {
+
+
     // If _controller is null we show Material Design loader, otherwise
     // display Zefyr editor.
     final Widget body = (_controller == null)
@@ -45,8 +63,7 @@ class EditorPageState extends State<EditorPage> {
 
     return WillPopScope(
       onWillPop: (){
-        print('Back button clicked');
-        Navigator.pop(context,true);
+        Navigator.pop(context, true);
         return Future<bool>.value(false);
       },
       child: Scaffold(
@@ -73,8 +90,8 @@ class EditorPageState extends State<EditorPage> {
     fileHelper helper = fileHelper();
     final contents = await helper.readFileContents();
 
-    if(contents.length > 0){
-      var json_str = jsonEncode(contents['new_file']);
+    if(contents.length > 0 && widget.id != ""){
+      var json_str = jsonEncode(contents[widget.id]);
       return NotusDocument.fromJson(jsonDecode(json_str));
     }
 
@@ -85,28 +102,17 @@ class EditorPageState extends State<EditorPage> {
 
 
   void _saveDocument(BuildContext context) {
-    // Notus documents can be easily serialized to JSON by passing to
-    // `jsonEncode` directly
-
-    //print( _controller.document.runtimeType );
+    String id = widget.id !="" ? widget.id : getRandomID();
 
     fileHelper helper = fileHelper();
 
     final currentContent = _controller.document.toJson(); //jsonEncode(_controller.document);
 
     helper.readFileContents().then(( fileContents ){
-
-      fileContents['new_file'] = currentContent;
-
+      fileContents[ id ] = currentContent;
       helper.writeFileContents(jsonEncode(fileContents)).then((_){
         Scaffold.of(context).showSnackBar(SnackBar(content: Text("Saved.")));
       });
-
-      /*
-      var rng = new Random();
-      print(rng.nextInt(10));
-      */
-
     });
 
 
