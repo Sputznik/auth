@@ -2,6 +2,7 @@ import 'dart:convert'; // access to jsonEncode()
 import 'dart:io'; // access to File and Directory classes
 import 'package:zefyr/zefyr.dart';
 import 'dart:math';
+import 'package:timeago/timeago.dart' as timeago;
 
 class FileHelper{
 
@@ -22,7 +23,7 @@ class FileHelper{
   }
 
   String getFileName(){
-    return Directory.systemTemp.path + "/test1.json";
+    return Directory.systemTemp.path + "/test2.json";
   }
 
 }
@@ -31,9 +32,11 @@ class PostData{
   String id;
   String title;
   NotusDocument content;
+  DateTime created_at;
 
-  PostData(id, String title, content){
+  PostData(String id, String title, DateTime created_at, content){
     this.id = id != "" ? id : getRandomID();
+    this.created_at = created_at;
     setTitle(title);
     if(content.length>0){
       setContent(content);
@@ -56,10 +59,15 @@ class PostData{
   void setContent(List content){ this.content = NotusDocument.fromJson(content); }
   NotusDocument getContent(){ return this.content;}
 
+  String getCreatedAt(){
+    return timeago.format(created_at);
+  }
+
   Map toJson(){
     return {
       "id"   : this.id,
       "title": this.title,
+      "created_at": this.created_at.toIso8601String(),
       "content": this.content.toJson()
     };
   }

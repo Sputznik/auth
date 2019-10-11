@@ -29,7 +29,8 @@ dependencies:
   zefyr:
   quill_delta:
   image_picker:
-  synchronized:
+  html_unescape:
+  timeago:
 
 
 

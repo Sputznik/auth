@@ -146,7 +146,7 @@ class EditorPageState extends State<EditorPage> {
   }
 
   PostData getCurrentPost(){
-    PostData post = PostData(getCurrentID(), getCurrentTitle(), []);
+    PostData post = PostData(widget.post.id, getCurrentTitle(), widget.post.created_at, []);
     // THIS NEEDS TO BE EXPLICITLY SET OTHERWISE WILL THROW A TYPE ERROR
     post.content = getCurrentDoc();
     return post;
@@ -155,7 +155,5 @@ class EditorPageState extends State<EditorPage> {
   String getCurrentTitle() => postTitleController.text != "" ? postTitleController.text : "Untitled";
 
   NotusDocument getCurrentDoc() => _controller.document;
-
-  String getCurrentID() => widget.post.id;
 
 }
