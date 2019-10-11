@@ -1,3 +1,5 @@
+import 'package:auth/file.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'dart:async';
 import 'dart:convert';
@@ -14,12 +16,18 @@ void main() {
 class QuickStartApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+
+    PostData post = PostData("", "Untitled", []);
+
     return MaterialApp(
-      title: 'Quick Start',
+      theme: ThemeData(
+          primarySwatch: Colors.red,
+      ),
+      title: 'Notes',
       initialRoute: '/',
       routes: {
         "/": (context) => JsonConvert(),
-        "/editor": (context) => EditorPage(0),
+        "/editor": (context) => EditorPage(post),
       },
     );
   }
