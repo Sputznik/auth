@@ -80,5 +80,17 @@ class PostData{
     await helper.writeFileContents(fileContents);
   }
 
+  delete(fileContents) async{
+    FileHelper helper = FileHelper();
+    fileContents.remove(this.id);
+    await helper.writeFileContents(fileContents);
+  }
+
+  String excerpt(String text, int limit){
+    text = text.trim();
+
+    return "";
+  }
+
 
 }
