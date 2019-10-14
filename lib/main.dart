@@ -17,7 +17,7 @@ class QuickStartApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
 
-    PostData post = PostData("", "Untitled", DateTime.now(), []);
+    PostData post = PostData({});
 
     return MaterialApp(
       theme: ThemeData(

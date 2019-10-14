@@ -23,7 +23,7 @@ class FileHelper{
   }
 
   String getFileName(){
-    return Directory.systemTemp.path + "/test2.json";
+    return Directory.systemTemp.path + "/test3.json";
   }
 
 }
@@ -34,12 +34,25 @@ class PostData{
   NotusDocument content;
   DateTime created_at;
 
-  PostData(String id, String title, DateTime created_at, content){
-    this.id = id != "" ? id : getRandomID();
-    this.created_at = created_at;
-    setTitle(title);
-    if(content.length>0){
-      setContent(content);
+  File featuredImage;
+
+  PostData(Map data){
+    this.id = data.containsKey('id') ? data['id'] : getRandomID();
+    this.created_at = data.containsKey('created_at') ? DateTime.parse(data['created_at']) : DateTime.now();
+
+    if(data.containsKey('featuredImage')){
+      //print(data['featuredImage'].length);
+      setFeaturedImage(File(data['featuredImage']));
+    }
+
+    // SET TITLE OF THE POST
+    data['title'] = data.containsKey('title') ? data['title'] : "Untitled";
+    setTitle(data['title']);
+
+    // SET CONTENT OF THE POST
+    data['content'] = data.containsKey('content') ? data['content'] : [];
+    if(data['content'].length>0){
+      setContent(data['content']);
     }
     else{
       // IF EMPTY LIST IS PASSED THEN SET CONTENT BY DEFAULT VALUE
@@ -59,17 +72,27 @@ class PostData{
   void setContent(List content){ this.content = NotusDocument.fromJson(content); }
   NotusDocument getContent(){ return this.content;}
 
+  File getFeaturedImage(){ return this.featuredImage;}
+  void setFeaturedImage(File featuredImage){ this.featuredImage = featuredImage; }
+
   String getCreatedAt(){
     return timeago.format(created_at);
   }
 
   Map toJson(){
-    return {
+
+    Map jsonObj = {
       "id"   : this.id,
       "title": this.title,
       "created_at": this.created_at.toIso8601String(),
-      "content": this.content.toJson()
+      "content": this.content.toJson(),
     };
+
+    if( this.featuredImage !=null && this.featuredImage.path != "" ){
+      jsonObj['featuredImage'] = this.featuredImage.path;
+    }
+
+    return jsonObj;
   }
 
   String toString(){ return this.toJson().toString(); }
@@ -86,11 +109,7 @@ class PostData{
     await helper.writeFileContents(fileContents);
   }
 
-  String excerpt(String text, int limit){
-    text = text.trim();
 
-    return "";
-  }
 
 
 }

@@ -146,10 +146,14 @@ class EditorPageState extends State<EditorPage> {
   }
 
   PostData getCurrentPost(){
-    PostData post = PostData(widget.post.id, getCurrentTitle(), widget.post.created_at, []);
+    widget.post.title = getCurrentTitle();
+    widget.post.content = getCurrentDoc();
+    /*
+    PostData post = PostData({ 'id': widget.post.id, 'title': getCurrentTitle(), 'created_at': widget.post.created_at });
     // THIS NEEDS TO BE EXPLICITLY SET OTHERWISE WILL THROW A TYPE ERROR
     post.content = getCurrentDoc();
-    return post;
+    */
+    return widget.post;
   }
 
   String getCurrentTitle() => postTitleController.text != "" ? postTitleController.text : "Untitled";
