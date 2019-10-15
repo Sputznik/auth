@@ -20,6 +20,7 @@ class QuickStartApp extends StatelessWidget {
     PostData post = PostData({});
 
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
       theme: ThemeData(
           primarySwatch: Colors.red,
       ),

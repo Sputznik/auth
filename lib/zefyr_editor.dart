@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'package:zefyr/zefyr.dart';
 import 'dart:math';
-
+import 'zefyr_image_picker.dart';
 import 'file.dart';
 
 class EditorPage extends StatefulWidget {
@@ -30,6 +30,8 @@ class EditorPageState extends State<EditorPage> {
   /// Zefyr editor like any other input field requires a focus node.
   FocusNode _focusNode;
 
+  ImageDelegate _imgDelegate;
+
   @override
   void initState() {
     super.initState();
@@ -38,6 +40,7 @@ class EditorPageState extends State<EditorPage> {
     setState(() {
       _controller = ZefyrController(widget.post.getContent());
       postTitle = createPostTitleWidget(widget.post.getTitle());
+      _imgDelegate = ImageDelegate(MyFileStorage());
     });
   }
 
@@ -63,11 +66,12 @@ class EditorPageState extends State<EditorPage> {
   Widget inputDetector() {
     return GestureDetector(
       child: InputDecorator(
+        expands: false,
         decoration: InputDecoration(
           border: InputBorder.none,
           focusedBorder: InputBorder.none,
           labelText: postTitleController.text != "" ? postTitleController.text : "Untitled",
-          labelStyle: TextStyle(fontSize: 30.0, color: Colors.white),
+          labelStyle: TextStyle(fontSize: 25.0, color: Colors.white),
         ),
       ),
       onTap: () {
@@ -117,10 +121,11 @@ class EditorPageState extends State<EditorPage> {
         ? Center(child: CircularProgressIndicator())
         : ZefyrScaffold(
             child: ZefyrEditor(
-//        toolbarDelegate: ,
               padding: EdgeInsets.all(16),
               controller: _controller,
               focusNode: _focusNode,
+              imageDelegate: _imgDelegate,
+              //imageDelegate: ImageDelegate(),
             ),
           );
 
