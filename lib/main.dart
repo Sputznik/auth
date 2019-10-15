@@ -6,7 +6,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 import './zefyr_editor.dart';
-import 'archive.dart';
+import 'preview.dart';
 import 'json.dart';
 
 void main() {
@@ -29,6 +29,7 @@ class QuickStartApp extends StatelessWidget {
       routes: {
         "/": (context) => JsonConvert(),
         "/editor": (context) => EditorPage(post),
+        //"preview": (context) => Preview(post)
       },
     );
   }

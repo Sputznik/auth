@@ -286,7 +286,8 @@ class PostData {
   }
 
   String getHtmlContent() {
-    return this.content.toJson().toString();
+    HtmlHelper html = HtmlHelper();
+    return html.convertToHtml(content);
   }
 
   File getFeaturedImage() {

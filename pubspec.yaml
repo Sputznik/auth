@@ -24,7 +24,7 @@ dependencies:
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^0.1.2
   http:
-  flutter_html: ^0.11.0
+  flutter_html_view:
   flutter_wordpress: ^0.1.4
   zefyr:
   quill_delta:

@@ -9,6 +9,7 @@ import 'package:quill_delta/quill_delta.dart';
 import 'package:zefyr/zefyr.dart';
 
 import 'file.dart';
+import 'preview.dart';
 
 class JsonConvert extends StatefulWidget {
   @override
@@ -52,8 +53,6 @@ class _JsonConvertState extends State<JsonConvert> {
       itemBuilder: (BuildContext context, int index) {
         PostData post = PostData(data[index]);
 
-        HtmlHelper html = HtmlHelper();
-        print(html.convertToHtml(post.content));
 
         return listTile(post, context);
       },
@@ -115,6 +114,10 @@ class _JsonConvertState extends State<JsonConvert> {
                       value: 'edit',
                       child: Text('Edit'),
                     ),
+                        PopupMenuItem<String>(
+                          value: 'preview',
+                          child: Text('Preview'),
+                        ),
                     PopupMenuItem<String>(
                       value: 'set-featured',
                       child: Text('Set Featured Image'),
@@ -132,6 +135,10 @@ class _JsonConvertState extends State<JsonConvert> {
                     switch (selectedItem) {
                       case 'edit':
                         openEditor(post);
+                        break;
+                      case 'preview':
+                        print('Preview');
+                        Navigator.push(context, MaterialPageRoute(builder: (context) => Preview(post)),);
                         break;
                       case "set-featured":
                         setFeaturedImage(post, context);
