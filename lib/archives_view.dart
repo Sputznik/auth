@@ -32,8 +32,13 @@ class _ArchivesState extends State<Archives> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Notes'),
-        backgroundColor: Colors.red[900],
+        title: Text('Notes',
+          style: TextStyle(
+            color: Colors.black87
+          ),
+        ),
+        backgroundColor: Colors.white,
+
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () => openEditor(PostData({})),
@@ -43,7 +48,7 @@ class _ArchivesState extends State<Archives> {
         backgroundColor: Colors.red[900],
       ),
       body: Container(
-//        padding: EdgeInsets.only(top: 5.0),
+        padding: EdgeInsets.only(top: 10.0),
         child: createListView(data),
       ),
     );

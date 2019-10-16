@@ -19,6 +19,7 @@ class QuickStartApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
           primarySwatch: Colors.red,
+          brightness: Brightness.light
       ),
       title: 'Notes',
       initialRoute: '/',
