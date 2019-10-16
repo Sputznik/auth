@@ -3,7 +3,7 @@ import 'dart:convert';
 import 'package:zefyr/zefyr.dart';
 import 'dart:math';
 import 'zefyr_image_picker.dart';
-import 'file.dart';
+import "postdata.dart";
 
 class EditorPage extends StatefulWidget {
 

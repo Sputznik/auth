@@ -1,13 +1,9 @@
-import 'package:auth/file.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'dart:async';
-import 'dart:convert';
-import 'package:http/http.dart' as http;
 
-import './zefyr_editor.dart';
-import 'preview.dart';
-import 'json.dart';
+import "postdata.dart";
+import './editor_view.dart';
+import 'archives_view.dart';
 
 void main() {
   runApp(QuickStartApp());
@@ -27,9 +23,8 @@ class QuickStartApp extends StatelessWidget {
       title: 'Notes',
       initialRoute: '/',
       routes: {
-        "/": (context) => JsonConvert(),
+        "/": (context) => Archives(),
         "/editor": (context) => EditorPage(post),
-        //"preview": (context) => Preview(post)
       },
     );
   }

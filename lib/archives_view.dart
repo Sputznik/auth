@@ -1,24 +1,26 @@
 import 'dart:ui';
 import 'dart:io';
-import 'package:auth/zefyr_editor.dart';
+import 'package:auth/editor_view.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:async';
-import 'package:quill_delta/quill_delta.dart';
-import 'package:zefyr/zefyr.dart';
+import 'storage.dart';
+import "postdata.dart";
 
-import 'file.dart';
-import 'preview.dart';
-
-class JsonConvert extends StatefulWidget {
+class Archives extends StatefulWidget {
   @override
-  _JsonConvertState createState() => _JsonConvertState();
+  _ArchivesState createState() => _ArchivesState();
 }
 
-class _JsonConvertState extends State<JsonConvert> {
+class _ArchivesState extends State<Archives> {
   List data = [];
+  InternalStorage storage;
   Map fileContents = {};
+
+  _ArchivesState() {
+    this.storage = InternalStorage('test3.json');
+  }
 
   @override
   void initState() {
@@ -53,6 +55,8 @@ class _JsonConvertState extends State<JsonConvert> {
       itemBuilder: (BuildContext context, int index) {
         PostData post = PostData(data[index]);
 
+        //InternalStorage helper = InternalStorage(post.getFeaturedImage().path);
+        // print(helper.toByteData());
 
         return listTile(post, context);
       },
@@ -114,10 +118,10 @@ class _JsonConvertState extends State<JsonConvert> {
                       value: 'edit',
                       child: Text('Edit'),
                     ),
-                        PopupMenuItem<String>(
-                          value: 'preview',
-                          child: Text('Preview'),
-                        ),
+                    PopupMenuItem<String>(
+                      value: 'preview',
+                      child: Text('Preview'),
+                    ),
                     PopupMenuItem<String>(
                       value: 'set-featured',
                       child: Text('Set Featured Image'),
@@ -138,13 +142,13 @@ class _JsonConvertState extends State<JsonConvert> {
                         break;
                       case 'preview':
                         print('Preview');
-                        Navigator.push(context, MaterialPageRoute(builder: (context) => Preview(post)),);
+                        print(post.getHtmlContent());
                         break;
                       case "set-featured":
                         setFeaturedImage(post, context);
                         break;
                       case "delete":
-                        post.delete(fileContents).then((_) {
+                        post.delete(storage).then((_) {
                           getData();
                         });
                         break;
@@ -218,13 +222,18 @@ class _JsonConvertState extends State<JsonConvert> {
         ),
       ),
     );
-    showDialog(
-        context: context, builder: (BuildContext context) => featuredDialog);
+
+    showDialog(context: context, builder: (BuildContext context) => featuredDialog);
   }
 
   saveSelectedImageAsFeatured(post, newImage) {
     post.setFeaturedImage(newImage);
-    post.saveToFile(fileContents).then((_) {
+    _savePostToFile(post);
+  }
+
+  void _savePostToFile(post) {
+    post.saveToFile(storage).then((_) {
+      //REFRESH UI
       getData();
     });
   }
@@ -235,15 +244,17 @@ class _JsonConvertState extends State<JsonConvert> {
   Future<File> openCamera() async =>
       await ImagePicker.pickImage(source: ImageSource.camera);
 
+  /*
+  * OPENS THE EDITOR
+  * WAITS FOR THE POP EVENT
+  * SAVES THE NEW POST/UPDATED POST ONLY IF POST CONTENT HAS BEEN ADDED ORD THE POST TITLE WAS CHANGED FROM THE DEFAULT
+  */
   void openEditor(PostData post) async {
     await Navigator.push(
             context, MaterialPageRoute(builder: (context) => EditorPage(post)))
         .then((post) {
-      // SAVE ONLY IF POST CONTENT HAS BEEN ADDED OR THE POST TITLE HAS BEEN CHANGED
       if (!(post.title == "Untitled" && post.content.length <= 1)) {
-        post.saveToFile(fileContents).then((_) {
-          getData();
-        });
+        _savePostToFile(post);
       } else {
         print('not saved');
       }
@@ -251,17 +262,16 @@ class _JsonConvertState extends State<JsonConvert> {
   }
 
   Future<String> getData() async {
-    FileHelper helper = FileHelper();
     data = [];
-    helper.readFileContents().then((value) {
+    storage.readFileContents().then((value) {
       fileContents = value;
+
       // REBUILD THE UI WHEN DATA HAS BEEN UPDATED
       setState(() {
         value.forEach((k, v) {
           v['id'] = k;
           data.add(v);
         });
-        //print(data);
       });
     });
     return 'Success';
