@@ -18,6 +18,8 @@ class QuickStartApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
+          buttonTheme: ButtonThemeData(minWidth: 5,),
+          textTheme: TextTheme(button: TextStyle(fontSize: 12)),
           primarySwatch: Colors.red,
           brightness: Brightness.light
       ),

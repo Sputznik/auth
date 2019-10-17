@@ -97,6 +97,7 @@ class EditorPageState extends State<EditorPage> {
               controller: _controller,
               focusNode: _focusNode,
               imageDelegate: _imgDelegate,
+              //selectionControls: SelectionDelegate(),
               toolbarDelegate: ToolbarDelegate(),
                 //ZefyrToolbarDelegate toolbarDelegate
             ),

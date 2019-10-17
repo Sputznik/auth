@@ -4,6 +4,7 @@ import 'package:zefyr/zefyr.dart';
 import 'dart:io';
 
 class ToolbarDelegate implements ZefyrToolbarDelegate {
+
   static const kDefaultButtonIcons = {
     ZefyrToolbarAction.bold: Icons.format_bold,
     ZefyrToolbarAction.italic: Icons.format_italic,
@@ -46,7 +47,7 @@ class ToolbarDelegate implements ZefyrToolbarDelegate {
 
     // REMOVE SOME WIDGETS
     if (action == ZefyrToolbarAction.code ||
-        action == ZefyrToolbarAction.link ||
+        action == ZefyrToolbarAction.hideKeyboard ||
         action == ZefyrToolbarAction.numberList ||
         action == ZefyrToolbarAction.bulletList ||
         action == ZefyrToolbarAction.horizontalRule) {
@@ -57,6 +58,7 @@ class ToolbarDelegate implements ZefyrToolbarDelegate {
     if (kDefaultButtonIcons.containsKey(action)) {
       final icon = kDefaultButtonIcons[action];
       final size = kSpecialIconSizes[action];
+
       return ZefyrButton.icon(
         action: action,
         icon: icon,
