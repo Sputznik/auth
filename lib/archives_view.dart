@@ -32,13 +32,8 @@ class _ArchivesState extends State<Archives> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Notes',
-          style: TextStyle(
-            color: Colors.black87
-          ),
-        ),
-        backgroundColor: Colors.white,
-
+        title: Text('Notes'),
+        backgroundColor: Colors.red[900],
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () => openEditor(PostData({})),
@@ -48,28 +43,23 @@ class _ArchivesState extends State<Archives> {
         backgroundColor: Colors.red[900],
       ),
       body: Container(
-        padding: EdgeInsets.only(top: 10.0),
-        child: createListView(data),
+        padding: EdgeInsets.only(top: 10.0, left: 5.0, right: 0),
+        child: ListView.builder(
+          itemCount: (data) == null ? 0 : data.length,
+          itemBuilder: (BuildContext context, int index) {
+            PostData post = PostData(data[index]);
+
+            //InternalStorage helper = InternalStorage(post.getFeaturedImage().path);
+            // print(helper.toByteData());
+
+            return postTile(post, context);
+          },
+        ),
       ),
     );
   }
 
-  Widget createListView(data) {
-    Widget listView = ListView.builder(
-      itemCount: (data) == null ? 0 : data.length,
-      itemBuilder: (BuildContext context, int index) {
-        PostData post = PostData(data[index]);
-
-        //InternalStorage helper = InternalStorage(post.getFeaturedImage().path);
-        // print(helper.toByteData());
-
-        return listTile(post, context);
-      },
-    );
-    return listView;
-  }
-
-  Widget listTile(post, BuildContext context) {
+  Widget postTile(post, BuildContext context) {
     return Card(
       child: Column(
         children: <Widget>[
@@ -97,17 +87,13 @@ class _ArchivesState extends State<Archives> {
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
-                    SizedBox(
-                      height: 5.0,
-                    ),
+                    SizedBox(height: 5.0),
                     Text(
                       post.getContent().toPlainText().replaceAll('\n', ' '),
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
-                    SizedBox(
-                      height: 20.0,
-                    ),
+                    SizedBox(height: 20.0),
                     Text(post.getCreatedAt(),
                         style: TextStyle(fontWeight: FontWeight.w300))
                   ],
@@ -196,6 +182,8 @@ class _ArchivesState extends State<Archives> {
               children: <Widget>[
                 IconButton(
                   onPressed: () {
+                    // CLOSE THE DIALOG BOX
+                    Navigator.of(context).pop();
                     openCamera().then((newImage) {
                       saveSelectedImageAsFeatured(post, newImage);
                     });
@@ -211,6 +199,8 @@ class _ArchivesState extends State<Archives> {
                 ),
                 IconButton(
                   onPressed: () {
+                    // CLOSE THE DIALOG BOX
+                    Navigator.of(context).pop();
                     openGallery().then((newImage) {
                       saveSelectedImageAsFeatured(post, newImage);
                     });

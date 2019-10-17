@@ -6,7 +6,6 @@ import 'zefyr_image_picker.dart';
 import "postdata.dart";
 
 class EditorPage extends StatefulWidget {
-
   final PostData post;
 
   EditorPage(this.post);
@@ -56,30 +55,12 @@ class EditorPageState extends State<EditorPage> {
       decoration: InputDecoration(
         border: InputBorder.none,
         focusedBorder: InputBorder.none,
-        contentPadding: EdgeInsets.only(left: 15, bottom: 11, top: 11, right: 15),
-        hintText: 'Title',
+        contentPadding: EdgeInsets.only(left: 0, bottom: 10, top: 10, right: 0),
+        hintText: 'New Title',
         hintStyle: TextStyle(fontSize: 20.0, color: Colors.black),
       ),
     );
   }
-
-  Widget inputDetector() {
-    return GestureDetector(
-      child: InputDecorator(
-        expands: false,
-        decoration: InputDecoration(
-          border: InputBorder.none,
-          focusedBorder: InputBorder.none,
-          labelText: postTitleController.text != "" ? postTitleController.text : "Untitled",
-          labelStyle: TextStyle(fontSize: 25.0, color: Colors.white),
-        ),
-      ),
-      onTap: () {
-        _showDialog();
-      },
-    );
-  }
-
 
   void _showDialog() {
     // flutter defined function
@@ -95,7 +76,6 @@ class EditorPageState extends State<EditorPage> {
             new FlatButton(
               child: Text("Save"),
               onPressed: () {
-                print(postTitleController.text);
                 Navigator.of(context).pop();
               },
             ),
@@ -103,14 +83,6 @@ class EditorPageState extends State<EditorPage> {
         );
       },
     );
-  }
-
-
-
-
-  String getRandomID() {
-    var rng = new Random();
-    return base64.encode([rng.nextInt(10), rng.nextInt(10)]);
   }
 
   @override
@@ -125,25 +97,41 @@ class EditorPageState extends State<EditorPage> {
               controller: _controller,
               focusNode: _focusNode,
               imageDelegate: _imgDelegate,
-              //imageDelegate: ImageDelegate(),
+              toolbarDelegate: ToolbarDelegate(),
+                //ZefyrToolbarDelegate toolbarDelegate
             ),
           );
 
     return WillPopScope(
+      // GET CURRENT POST & PASS THE POST DATA TO THE PREVIOUS SCREEN FOR SAVING
       onWillPop: () {
-        // GET CURRENT POST
         PostData post = getCurrentPost();
-
-        // PASS THE POST DATA TO THE PREVIOUS SCREEN FOR SAVING
         Navigator.pop(context, post);
         return Future<bool>.value(false);
       },
       child: Scaffold(
         appBar: AppBar(
-//          title: postTitle,
-          title: inputDetector(),
+          title: GestureDetector(
+            child: Text(postTitleController.text),
+            onTap: () {
+              _showDialog();
+            },
+          ),
           backgroundColor: Colors.red[900],
-//          automaticallyImplyLeading: false,
+          toolbarOpacity: 0.8,
+          titleSpacing: 0,
+          actions: <Widget>[
+            IconButton(
+              onPressed: (){
+                _showDialog();
+              },
+              icon: Icon(
+                Icons.edit,
+                color: Colors.white,
+              )
+            )
+          ],
+          //automaticallyImplyLeading: false,
         ),
         body: body,
       ),
@@ -153,11 +141,6 @@ class EditorPageState extends State<EditorPage> {
   PostData getCurrentPost(){
     widget.post.title = getCurrentTitle();
     widget.post.content = getCurrentDoc();
-    /*
-    PostData post = PostData({ 'id': widget.post.id, 'title': getCurrentTitle(), 'created_at': widget.post.created_at });
-    // THIS NEEDS TO BE EXPLICITLY SET OTHERWISE WILL THROW A TYPE ERROR
-    post.content = getCurrentDoc();
-    */
     return widget.post;
   }
 

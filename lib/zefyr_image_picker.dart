@@ -3,9 +3,84 @@ import 'package:image_picker/image_picker.dart';
 import 'package:zefyr/zefyr.dart';
 import 'dart:io';
 
-class ImageDelegate implements ZefyrImageDelegate<ImageSource> {
+class ToolbarDelegate implements ZefyrToolbarDelegate {
+  static const kDefaultButtonIcons = {
+    ZefyrToolbarAction.bold: Icons.format_bold,
+    ZefyrToolbarAction.italic: Icons.format_italic,
+    ZefyrToolbarAction.link: Icons.link,
+    ZefyrToolbarAction.unlink: Icons.link_off,
+    ZefyrToolbarAction.clipboardCopy: Icons.content_copy,
+    ZefyrToolbarAction.openInBrowser: Icons.open_in_new,
+    ZefyrToolbarAction.heading: Icons.format_size,
+    ZefyrToolbarAction.bulletList: Icons.format_list_bulleted,
+    ZefyrToolbarAction.numberList: Icons.format_list_numbered,
+    ZefyrToolbarAction.code: Icons.code,
+    ZefyrToolbarAction.quote: Icons.format_quote,
+    ZefyrToolbarAction.horizontalRule: Icons.remove,
+    ZefyrToolbarAction.image: Icons.photo,
+    ZefyrToolbarAction.cameraImage: Icons.photo_camera,
+    ZefyrToolbarAction.galleryImage: Icons.photo_library,
+    ZefyrToolbarAction.hideKeyboard: Icons.keyboard_hide,
+    ZefyrToolbarAction.close: Icons.close,
+    ZefyrToolbarAction.confirm: Icons.check,
+  };
 
+  static const kSpecialIconSizes = {
+    ZefyrToolbarAction.unlink: 20.0,
+    ZefyrToolbarAction.clipboardCopy: 20.0,
+    ZefyrToolbarAction.openInBrowser: 20.0,
+    ZefyrToolbarAction.close: 20.0,
+    ZefyrToolbarAction.confirm: 20.0,
+  };
+
+  static const kDefaultButtonTexts = {
+    ZefyrToolbarAction.headingLevel1: 'H1',
+    ZefyrToolbarAction.headingLevel2: 'H2',
+    ZefyrToolbarAction.headingLevel3: 'H3',
+  };
+
+  @override
+  Widget buildButton(BuildContext context, ZefyrToolbarAction action,
+      {VoidCallback onPressed}) {
+    //print(action);
+
+    // REMOVE SOME WIDGETS
+    if (action == ZefyrToolbarAction.code ||
+        action == ZefyrToolbarAction.link ||
+        action == ZefyrToolbarAction.numberList ||
+        action == ZefyrToolbarAction.bulletList ||
+        action == ZefyrToolbarAction.horizontalRule) {
+      return SizedBox.shrink();
+    }
+
+    final theme = Theme.of(context);
+    if (kDefaultButtonIcons.containsKey(action)) {
+      final icon = kDefaultButtonIcons[action];
+      final size = kSpecialIconSizes[action];
+      return ZefyrButton.icon(
+        action: action,
+        icon: icon,
+        iconSize: size,
+        onPressed: onPressed,
+      );
+    } else {
+      final text = kDefaultButtonTexts[action];
+      assert(text != null);
+      final style = theme.textTheme.caption
+          .copyWith(fontWeight: FontWeight.bold, fontSize: 14.0);
+      return ZefyrButton.text(
+        action: action,
+        text: text,
+        style: style,
+        onPressed: onPressed,
+      );
+    }
+  }
+}
+
+class ImageDelegate implements ZefyrImageDelegate<ImageSource> {
   final MyFileStorage storage;
+
   ImageDelegate(this.storage);
 
   @override
@@ -16,26 +91,12 @@ class ImageDelegate implements ZefyrImageDelegate<ImageSource> {
 
   @override
   Widget buildImage(BuildContext context, String path) {
-    /*
-    final file = File.fromUri(Uri.parse(key));
-    // Create standard [FileImage] provider. If [key] was an HTTP link
-    // we could use [NetworkImage] instead.
-    final image = FileImage(file);
-    return Image(image: image);
-    */
-
     File file = File(path);
 
     return Container(
       decoration: BoxDecoration(
-        image: DecorationImage(
-          image: FileImage(file),
-          fit: BoxFit.cover
-        )
-      ),
+          image: DecorationImage(image: FileImage(file), fit: BoxFit.cover)),
     );
-
-    //return Image.file(file, fit: BoxFit.cover );
   }
 
   @override
@@ -53,36 +114,8 @@ class ImageDelegate implements ZefyrImageDelegate<ImageSource> {
   }
 }
 
-/*
-abstract class ZefyrImageDelegate<S> {
-  /// Unique key to identify camera source.
-  S get cameraSource;
-
-  /// Unique key to identify gallery source.
-  S get gallerySource;
-
-  /// Builds image widget for specified image [key].
-  ///
-  /// The [key] argument contains value which was previously returned from
-  /// [pickImage].
-  Widget buildImage(BuildContext context, String key);
-
-  /// Picks an image from specified [source].
-  ///
-  /// Returns unique string key for the selected image. Returned key is stored
-  /// in the document.
-  ///
-  /// Depending on your application returned key may represent a path to
-  /// an image file on user's device, an HTTP link, or an identifier generated
-  /// by a file hosting service like AWS S3 or Google Drive.
-  Future<String> pickImage(S source);
-}
-*/
-
-class MyFileStorage{
-
-  Future<String> uploadImage(File file) async{
+class MyFileStorage {
+  Future<String> uploadImage(File file) async {
     return file.path;
   }
-
 }
