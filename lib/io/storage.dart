@@ -6,6 +6,7 @@ import 'dart:ui';
 
 import 'package:flutter/services.dart'; // access to File and Directory classes
 
+
 class InternalStorage{
 
   File file;
@@ -48,4 +49,3 @@ class InternalStorage{
 
   String getFileName() { return this.fileName; }
 }
-

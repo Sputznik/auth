@@ -4,6 +4,7 @@ import 'package:zefyr/zefyr.dart';
 import 'dart:math';
 import 'zefyr_image_picker.dart';
 import "postdata.dart";
+import "io/stores.dart";
 
 class EditorPage extends StatefulWidget {
   final PostData post;
@@ -16,11 +17,13 @@ class EditorPage extends StatefulWidget {
 
 class EditorPageState extends State<EditorPage> {
   TextEditingController postTitleController;
+  MediaStorage mediaStorage;
   var postTitle;
 
   EditorPageState() {
     //Post title field
     this.postTitle = createPostTitleWidget("Untitled");
+    this.mediaStorage = MediaStorage();
   }
 
   /// Allows to control the editor and the document.
@@ -36,11 +39,16 @@ class EditorPageState extends State<EditorPage> {
     super.initState();
     _focusNode = FocusNode();
 
-    setState(() {
-      _controller = ZefyrController(widget.post.getContent());
-      postTitle = createPostTitleWidget(widget.post.getTitle());
-      _imgDelegate = ImageDelegate(MyFileStorage());
+    // READ THE MEDIA CONTENTS TO INITIALIZE THE MEDIA STORAGE ELEMENTS
+    mediaStorage.read().then((_){
+      setState(() {
+        _controller = ZefyrController(widget.post.getContent());
+        postTitle = createPostTitleWidget(widget.post.getTitle());
+        _imgDelegate = ImageDelegate(mediaStorage);
+      });
     });
+
+
   }
 
   TextFormField createPostTitleWidget(String text){

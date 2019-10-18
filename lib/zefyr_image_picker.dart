@@ -1,7 +1,9 @@
+import 'package:auth/postdata.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:zefyr/zefyr.dart';
 import 'dart:io';
+import 'io/stores.dart';
 
 class ToolbarDelegate implements ZefyrToolbarDelegate {
 
@@ -81,7 +83,7 @@ class ToolbarDelegate implements ZefyrToolbarDelegate {
 }
 
 class ImageDelegate implements ZefyrImageDelegate<ImageSource> {
-  final MyFileStorage storage;
+  final MediaStorage storage;
 
   ImageDelegate(this.storage);
 
@@ -92,9 +94,13 @@ class ImageDelegate implements ZefyrImageDelegate<ImageSource> {
   ImageSource get gallerySource => ImageSource.gallery;
 
   @override
-  Widget buildImage(BuildContext context, String path) {
-    File file = File(path);
+  Widget buildImage(BuildContext context, String mediaID) {
 
+    String path = storage.getLocalFilePath(mediaID);
+
+    if( path == null ){ return Container(); }
+
+    File file = File(path);
     return Container(
       decoration: BoxDecoration(
           image: DecorationImage(image: FileImage(file), fit: BoxFit.cover)),
@@ -106,18 +112,13 @@ class ImageDelegate implements ZefyrImageDelegate<ImageSource> {
     final file = await ImagePicker.pickImage(source: source);
     if (file == null) return null;
 
+    final MediaAttachment mediaAttachment = storage.createMediaAttachment(file);
+
+    final String imageSource = await storage.saveAsMediaAttachment(mediaAttachment);
+
     // Use my storage service to upload selected file. The uploadImage method
     // returns unique ID of newly uploaded image on my server.
-    return file.path;
-    /*
-    final String imageId = await storage.uploadImage(file);
-    return imageId;
-    */
-  }
-}
+    return imageSource;
 
-class MyFileStorage {
-  Future<String> uploadImage(File file) async {
-    return file.path;
   }
 }

@@ -1,5 +1,5 @@
 import 'dart:convert';
-import 'package:auth/storage.dart';
+
 
 import 'package:zefyr/zefyr.dart';
 import 'dart:math';
@@ -7,11 +7,30 @@ import 'package:timeago/timeago.dart' as timeago;
 import 'dart:io';
 import 'html.dart';
 
+import "io/stores.dart";
 
-class PostData {
+class BaseData {
   String id;
+
+  String getRandomID() {
+    var rng = new Random();
+    return base64.encode([rng.nextInt(10), rng.nextInt(10)]);
+  }
+
+  Map toJson() => {};
+
+  String toString() => this.toJson().toString();
+
+}
+
+class PostData extends BaseData {
+
+  String id;
+
   String title;
+
   NotusDocument content;
+
   DateTime created_at;
 
   File featuredImage;
@@ -42,33 +61,69 @@ class PostData {
     }
   }
 
-
-
   void setTitle(String title) => this.title = title;
 
   String getTitle() => this.title;
 
-  void setContent(List content) => this.content = NotusDocument.fromJson(content);
+  void setContent(List content) =>
+      this.content = NotusDocument.fromJson(content);
 
   NotusDocument getContent() => this.content;
 
   File getFeaturedImage() => this.featuredImage;
 
-  void setFeaturedImage(File featuredImage) => this.featuredImage = featuredImage;
+  void setFeaturedImage(File featuredImage) =>
+      this.featuredImage = featuredImage;
 
   String getCreatedAt() => timeago.format(created_at);
-
-  String toString() => this.toJson().toString();
-
-  String getRandomID() {
-    var rng = new Random();
-    return base64.encode([rng.nextInt(10), rng.nextInt(10)]);
-  }
 
   String getHtmlContent() {
     HtmlHelper html = HtmlHelper();
     return html.convertToHtml(content);
   }
+
+  List<HtmlTag> getHtmlJson() {
+    HtmlHelper html = HtmlHelper();
+    return html.convertToJson(content);
+  }
+
+  List<MediaAttachment> getAttachments(mediaStorage) {
+    Map mediaContents = mediaStorage.getStoreContents();
+    List<MediaAttachment> attachments = [];
+    /*
+    List<HtmlTag> tags = getHtmlJson();
+    for (int i = 0; i < tags.length; i++) {
+
+      if (tags[i].tag == 'img' && tags[i].attributes.containsKey('src')) {
+        String media_id  = tags[i].attributes['src'];
+
+        MediaAttachment temp = mediaStorage.getMediaAttachment(media_id);
+
+        if(temp != null){
+          attachments.add(temp);
+        }
+
+      }
+    }
+    */
+    return attachments;
+  }
+
+  void uploadAttachments() async {
+    MediaStorage mediaStorage = MediaStorage();
+    await mediaStorage.read();
+
+    List<MediaAttachment> attachments = getAttachments(mediaStorage);
+
+    print('attachments');
+
+    print(attachments);
+
+    for (int i = 0; i < attachments.length; i++) {
+      attachments[i].upload(mediaStorage);
+    }
+  }
+
 
 
   Map toJson() {
@@ -87,20 +142,60 @@ class PostData {
   }
 
 
-  void saveToFile(InternalStorage internalStorage) async {
-    Map contents = internalStorage.getContents();
-    contents[this.id] = this.toJson();
-    await _writeToFile(internalStorage, contents);
+}
+
+class MediaAttachment extends BaseData {
+  String id;
+
+  String fileName;
+
+  File localFile;
+
+  String networkUrl;
+
+  MediaAttachment(Map data) {
+    this.id = data.containsKey('id') ? data['id'] : getRandomID();
+
+    this.fileName = data.containsKey('fileName') ? data['fileName'] : "item";
+
+    if (data.containsKey('localFile')) {
+      setLocalFile(File(data['localFile']));
+    }
+
+    if (data.containsKey('networkUrl')) {
+      setNetworkUrl(data['networkUrl']);
+    }
   }
 
-  void delete(InternalStorage internalStorage) async {
-    Map contents = internalStorage.getContents();
-    contents.remove(this.id);
-    await _writeToFile(internalStorage, contents);
+  File getLocalFile() => this.localFile;
+
+  void setLocalFile(localFile) => this.localFile = localFile;
+
+  String getNetwrkUrl() => this.networkUrl;
+
+  void setNetworkUrl(networkUrl) => this.networkUrl = networkUrl;
+
+  Map toJson() {
+    return {
+      'id': id,
+      'fileName': fileName,
+      'localFile': localFile.path,
+      'networkUrl': networkUrl
+    };
   }
 
-  Future _writeToFile(InternalStorage internalStorage, Map newContent) async{
-    internalStorage.setContents(newContent);
-    await internalStorage.writeFileContents();
+  // SEND TO SERVER
+  Future upload(MediaStorage mediaStorage) async {
+
+    // TEST RUN THAT THE SERVER WILL RETURN AN OBJECT WHICH WILL CONTAIN THE NETWORK URL OF THE FILE
+    await Future.delayed(const Duration(milliseconds: 500));
+    setNetworkUrl("https://churchbuzz.in/wp-content/uploads/2019/08/zekeriya-sen-zY7ArPAVino-unsplash-e1567068913528.jpg");
+
+    // SAVE THE NEW NETWORK URL TO THE LOCAL SYSTEM
+    await mediaStorage.saveAsMediaAttachment(this);
+
+
   }
+
+
 }

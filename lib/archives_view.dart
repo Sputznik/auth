@@ -5,7 +5,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:async';
-import 'storage.dart';
+import 'io/stores.dart';
 import "postdata.dart";
 
 class Archives extends StatefulWidget {
@@ -15,11 +15,15 @@ class Archives extends StatefulWidget {
 
 class _ArchivesState extends State<Archives> {
   List data = [];
-  InternalStorage storage;
+
+  PostsStore postsStore;
+
   Map fileContents = {};
 
+  bool isLoading = false;
+
   _ArchivesState() {
-    this.storage = InternalStorage('test3.json');
+    postsStore = PostsStore();
   }
 
   @override
@@ -34,6 +38,14 @@ class _ArchivesState extends State<Archives> {
       appBar: AppBar(
         title: Text('Notes'),
         backgroundColor: Colors.red[900],
+        leading: !isLoading
+            ? null
+            : (Container(
+                padding: EdgeInsets.all(15.0),
+                child: CircularProgressIndicator(
+                  valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                ))),
+        automaticallyImplyLeading: false,
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () => openEditor(PostData({})),
@@ -48,10 +60,7 @@ class _ArchivesState extends State<Archives> {
           itemCount: (data) == null ? 0 : data.length,
           itemBuilder: (BuildContext context, int index) {
             PostData post = PostData(data[index]);
-
-            //InternalStorage helper = InternalStorage(post.getFeaturedImage().path);
-            // print(helper.toByteData());
-
+            //post.uploadAttachments();
             return postTile(post, context);
           },
         ),
@@ -139,9 +148,7 @@ class _ArchivesState extends State<Archives> {
                         setFeaturedImage(post, context);
                         break;
                       case "delete":
-                        post.delete(storage).then((_) {
-                          getData();
-                        });
+                        deletePost(post);
                         break;
                       case "publish":
                         /*
@@ -168,57 +175,54 @@ class _ArchivesState extends State<Archives> {
     return image;
   }
 
+  void deletePost(post) async{
+    await postsStore.delete(post.id);
+    getData();
+  }
+
   setFeaturedImage(post, context) {
     var featuredDialog = AlertDialog(
-      title: Text('Choose Image'),
+      title: Text('Choose An Image'),
+      actions: <Widget>[
+        FlatButton(
+          child: Text("Cancel"),
+          onPressed: () {
+            Navigator.of(context).pop();
+          },
+        ),
+      ],
       content: Container(
-        height: 100.0,
+        height: 80.0,
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: <Widget>[
-                IconButton(
-                  onPressed: () {
-                    // CLOSE THE DIALOG BOX
-                    Navigator.of(context).pop();
-                    openCamera().then((newImage) {
-                      saveSelectedImageAsFeatured(post, newImage);
-                    });
-                  },
-                  icon: Icon(
-                    Icons.camera_alt,
-                    size: 50.0,
-                    color: Colors.red[900],
-                  ),
-                ),
-                SizedBox(
-                  width: 40.0,
-                ),
-                IconButton(
-                  onPressed: () {
-                    // CLOSE THE DIALOG BOX
-                    Navigator.of(context).pop();
-                    openGallery().then((newImage) {
-                      saveSelectedImageAsFeatured(post, newImage);
-                    });
-                  },
-                  icon: Icon(
-                    Icons.perm_media,
-                    size: 50.0,
-                    color: Colors.red[900],
-                  ),
-                ),
-              ],
+            SizedBox(height: 20.0),
+            InkWell(
+              child: Text("Take photo"),
+              onTap: () {
+                Navigator.of(context).pop();
+                openCamera().then((newImage) {
+                  saveSelectedImageAsFeatured(post, newImage);
+                });
+              },
+            ),
+            SizedBox(height: 20.0),
+            InkWell(
+              child: Text("Choose from gallery"),
+              onTap: () {
+                Navigator.of(context).pop();
+                openGallery().then((newImage) {
+                  saveSelectedImageAsFeatured(post, newImage);
+                });
+              },
             ),
           ],
         ),
       ),
     );
 
-    showDialog(context: context, builder: (BuildContext context) => featuredDialog);
+    showDialog(
+        context: context, builder: (BuildContext context) => featuredDialog);
   }
 
   saveSelectedImageAsFeatured(post, newImage) {
@@ -226,11 +230,10 @@ class _ArchivesState extends State<Archives> {
     _savePostToFile(post);
   }
 
-  void _savePostToFile(post) {
-    post.saveToFile(storage).then((_) {
-      //REFRESH UI
-      getData();
-    });
+  void _savePostToFile(post) async{
+    print('saving in progress');
+    await postsStore.saveAsPost(post);
+    getData();
   }
 
   Future<File> openGallery() async =>
@@ -257,18 +260,31 @@ class _ArchivesState extends State<Archives> {
   }
 
   Future<String> getData() async {
-    data = [];
-    storage.readFileContents().then((value) {
-      fileContents = value;
+    // ENABLE THE LOADING STATE
+    setState(() {
+      isLoading = true;
+    });
 
-      // REBUILD THE UI WHEN DATA HAS BEEN UPDATED
+    print('read');
+
+    // READ FROM THE FILE
+    await postsStore.read();
+    fileContents = postsStore.getStoreContents();
+
+    // AFTER A DELAY REBUILD THE UI
+    Future.delayed(const Duration(milliseconds: 500), () {
+      data = [];
       setState(() {
-        value.forEach((k, v) {
+        fileContents.forEach((k, v) {
+          //print(v);
           v['id'] = k;
           data.add(v);
         });
+        isLoading = false;
       });
     });
+
+
     return 'Success';
   }
 }
