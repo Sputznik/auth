@@ -5,6 +5,8 @@ import "postdata.dart";
 import './editor_view.dart';
 import 'archives_view.dart';
 
+import 'demo_view.dart';
+
 void main() {
   runApp(QuickStartApp());
 }
@@ -24,8 +26,9 @@ class QuickStartApp extends StatelessWidget {
           brightness: Brightness.light
       ),
       title: 'Notes',
-      initialRoute: '/',
+      initialRoute: '/demo',
       routes: {
+        "/demo": (context) => PostsList(),
         "/": (context) => Archives(),
         "/editor": (context) => EditorPage(post),
       },
