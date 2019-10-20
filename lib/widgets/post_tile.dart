@@ -6,6 +6,7 @@ import 'package:auth/editor_view.dart';
 import 'package:flutter/material.dart';
 import '../io/stores.dart';
 import "../postdata.dart";
+import 'post_options.dart';
 import 'image_picker_dialog.dart';
 
 class PostTile extends StatefulWidget {
@@ -53,8 +54,7 @@ class _PostTileState extends State<PostTile> {
                 height: 120,
                 decoration: BoxDecoration(
                     image: DecorationImage(
-                        image: buildFeaturedImage(context),
-                        fit: BoxFit.cover)),
+                        image: buildFeaturedImage(context), fit: BoxFit.cover)),
               ),
               Container(
                 width: 195,
@@ -85,61 +85,42 @@ class _PostTileState extends State<PostTile> {
               Container(
                 padding: EdgeInsets.all(0),
                 width: 30,
-                child: PopupMenuButton(
-                  itemBuilder: (BuildContext context) =>
-                      <PopupMenuEntry<String>>[
-                    PopupMenuItem<String>(
-                      value: 'edit',
-                      child: Text('Edit'),
-                    ),
-                    PopupMenuItem<String>(
-                      value: 'set-featured',
-                      child: Text('Set Featured Image'),
-                    ),
-                    PopupMenuItem<String>(
-                      value: 'delete',
-                      child: Text('Delete'),
-                    ),
-                    PopupMenuItem<String>(
-                      value: 'publish',
-                      child: Text('Publish'),
-                    ),
-                  ],
-                  onSelected: (selectedItem) {
-                    switch (selectedItem) {
-                      case 'edit':
-                        openEditor();
-                        break;
-                      case "set-featured":
-                        showDialog(
-                            context: context,
-                            builder: (BuildContext context) =>
-                                ImagePickerDialog()).then((newImage) {
-                          setState(() {
-                            post.setFeaturedImage(newImage);
-                          });
-                        });
-                        break;
-                      case "delete":
-                        setState(() {
-                          post = null;
-                        });
-                        store.delete(post.id);
-                        break;
-                      case "publish":
-                        /*
-                         * OPERATION TO SEND TO API AND GET IT PUBLISHED USING WP API
-                         */
-                        break;
-                    }
-                  },
-                ),
+                child: PostOptionsMenu(onSelectedOption),
               ),
             ],
           )
         ],
       ),
     );
+  }
+
+  void onSelectedOption(selectedItem) {
+    switch (selectedItem) {
+      case 'edit':
+        openEditor();
+        break;
+      case "set-featured":
+        showDialog(
+                context: context,
+                builder: (BuildContext context) => ImagePickerDialog())
+            .then((newImage) {
+          setState(() {
+            post.setFeaturedImage(newImage);
+          });
+        });
+        break;
+      case "delete":
+        setState(() {
+          post = null;
+        });
+        store.delete(post.id);
+        break;
+      case "publish":
+        /*
+         * OPERATION TO SEND TO API AND GET IT PUBLISHED USING WP API
+         */
+        break;
+    }
   }
 
   /*
