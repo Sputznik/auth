@@ -8,7 +8,7 @@ import 'dart:async';
 import 'io/stores.dart';
 import "postdata.dart";
 
-import "posttile_view.dart";
+import "widgets/post_tile.dart";
 
 class PostsList extends StatefulWidget {
   @override

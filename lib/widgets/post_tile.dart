@@ -1,12 +1,12 @@
 import 'dart:ui';
 import 'dart:io';
 import 'package:auth/editor_view.dart';
-import 'package:flutter/cupertino.dart';
+
+//import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:image_picker/image_picker.dart';
-import 'dart:async';
-import 'io/stores.dart';
-import "postdata.dart";
+import '../io/stores.dart';
+import "../postdata.dart";
+import 'image_picker_dialog.dart';
 
 class PostTile extends StatefulWidget {
   final PostData post;
@@ -20,7 +20,6 @@ class PostTile extends StatefulWidget {
 }
 
 class _PostTileState extends State<PostTile> {
-
   PostData post;
 
   final PostsStore store;
@@ -34,68 +33,13 @@ class _PostTileState extends State<PostTile> {
     return SizedBox.shrink();
   }
 
-  ImageProvider buildFeaturedImageWidget(BuildContext context) {
+  ImageProvider buildFeaturedImage(BuildContext context) {
     ImageProvider image;
     image = AssetImage('assets/default.png');
     if (post.featuredImage != null) {
       image = FileImage(post.getFeaturedImage());
     }
     return image;
-  }
-
-  buildFeaturedImage(post, context) {
-    var featuredDialog = AlertDialog(
-      title: Text('Choose An Image'),
-      actions: <Widget>[
-        FlatButton(
-          child: Text("Cancel"),
-          onPressed: () {
-            Navigator.of(context).pop();
-          },
-        ),
-      ],
-      content: Container(
-        height: 80.0,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            SizedBox(height: 20.0),
-            InkWell(
-              child: Text("Take photo"),
-              onTap: () {
-                Navigator.of(context).pop();
-                openCamera().then((newImage) {
-                  saveSelectedImageAsFeatured(post, newImage);
-                });
-              },
-            ),
-            SizedBox(height: 20.0),
-            InkWell(
-              child: Text("Choose from gallery"),
-              onTap: () {
-                Navigator.of(context).pop();
-                openGallery().then((newImage) {
-                  saveSelectedImageAsFeatured(post, newImage);
-                });
-              },
-            ),
-          ],
-        ),
-      ),
-    );
-
-    showDialog(
-        context: context, builder: (BuildContext context) => featuredDialog);
-  }
-
-  Future<File> openGallery() async =>
-      await ImagePicker.pickImage(source: ImageSource.gallery);
-
-  Future<File> openCamera() async =>
-      await ImagePicker.pickImage(source: ImageSource.camera);
-
-  saveSelectedImageAsFeatured(post, newImage) {
-    post.setFeaturedImage(newImage);
   }
 
   Widget buildItem(context) {
@@ -109,7 +53,7 @@ class _PostTileState extends State<PostTile> {
                 height: 120,
                 decoration: BoxDecoration(
                     image: DecorationImage(
-                        image: buildFeaturedImageWidget(context),
+                        image: buildFeaturedImage(context),
                         fit: BoxFit.cover)),
               ),
               Container(
@@ -167,7 +111,14 @@ class _PostTileState extends State<PostTile> {
                         openEditor();
                         break;
                       case "set-featured":
-                        //setFeaturedImage(post, context);
+                        showDialog(
+                            context: context,
+                            builder: (BuildContext context) =>
+                                ImagePickerDialog()).then((newImage) {
+                          setState(() {
+                            post.setFeaturedImage(newImage);
+                          });
+                        });
                         break;
                       case "delete":
                         setState(() {
@@ -197,7 +148,6 @@ class _PostTileState extends State<PostTile> {
   * SAVES THE NEW POST RECEIVED & REBUILDS THE UI ONLY IF THE UPDATED POST HAS CHANGED
   */
   void openEditor() async {
-
     // TAKE A SNAPSHOT OF THE DATA AS STRING BEFORE IT IS SENT
     String oldPostData = post.toString();
 
@@ -205,7 +155,6 @@ class _PostTileState extends State<PostTile> {
             context, MaterialPageRoute(builder: (context) => EditorPage(post)))
         .then((newPost) {
       if (newPost.toString() != oldPostData) {
-
         // SAVE TO FILE
         store.saveAsPost(post);
 
