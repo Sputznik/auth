@@ -58,21 +58,17 @@ class MediaAttachment extends BaseData {
     return imageProvider;
   }
 
-/*
+
   // SEND TO SERVER
-  Future upload(MediaStorage mediaStorage) async {
+  Future upload() async {
 
     // TEST RUN THAT THE SERVER WILL RETURN AN OBJECT WHICH WILL CONTAIN THE NETWORK URL OF THE FILE
     await Future.delayed(const Duration(milliseconds: 500));
     setNetworkUrl("https://churchbuzz.in/wp-content/uploads/2019/08/zekeriya-sen-zY7ArPAVino-unsplash-e1567068913528.jpg");
 
-    // SAVE THE NEW NETWORK URL TO THE LOCAL SYSTEM
-    await mediaStorage.saveAsMediaAttachment(this);
-
-
   }
 
-   */
+
 
 
 }

@@ -75,54 +75,73 @@ class PostData extends BaseData {
     return html.convertToJson(content);
   }
 
-  /*
-  Future getAttachments() async{
-
-    MediaStorage mediaStorage = MediaStorage();
-
-    await mediaStorage.read();
-
-    Map mediaContents = mediaStorage.getStoreContents();
-
-    //print(mediaContents);
-
-    List<MediaAttachment> attachments = [];
+  // GETS THE ATTACHMENTS THAT ARE ACTUALLY EMBEDDED INSIDE THE DOCUMENT
+  List<MediaAttachment> getInlineAttachments(){
+    List<MediaAttachment> inlineAttachments = [];
 
     List<HtmlTag> tags = getHtmlJson();
     for (int i = 0; i < tags.length; i++) {
-
       if (tags[i].tag == 'img' && tags[i].attributes.containsKey('src')) {
         String mediaId  = tags[i].attributes['src'];
+        int index = int.parse(mediaId);
 
-        MediaAttachment temp = mediaStorage.getMediaAttachment(mediaId);
-
+        MediaAttachment temp = getEachAttachment(index);
         if(temp != null){
-          attachments.add(temp);
+          inlineAttachments.add(temp);
         }
-
       }
     }
-
-    print(attachments);
-
-    //return attachments;
+    inlineAttachments.add(this.featuredImage);
+    return inlineAttachments;
   }
 
   void uploadAttachments() async {
-    MediaStorage mediaStorage = MediaStorage();
-    await mediaStorage.read();
-
-    List<MediaAttachment> attachments = []; //getAttachments();
-
-    print('attachments');
-
-    print(attachments);
-
+    List<MediaAttachment> attachments = getInlineAttachments();
     for (int i = 0; i < attachments.length; i++) {
-      attachments[i].upload(mediaStorage);
+      await attachments[i].upload();
     }
   }
-  */
+
+  // REPLACE IMAGE TAG SOURCES WITH NETWORK URLS, SHOULD BE CALLED ONLY AFTER THE MEDIA ATTACHMENTS ARE UPDATED
+  List<HtmlTag> prepareHtmlTagsForUpload(){
+
+    List<HtmlTag> tags = getHtmlJson();
+    for (int i = 0; i < tags.length; i++) {
+      if (tags[i].tag == 'img' && tags[i].attributes.containsKey('src')) {
+        String mediaId  = tags[i].attributes['src'];
+        int index = int.parse(mediaId);
+
+        MediaAttachment temp = getEachAttachment(index);
+        if(temp != null && temp.networkUrl != null){
+          tags[i].attributes['src'] = temp.networkUrl;
+        }
+        else{
+          // IF OBJECT IF EMPTY/NULL THEN BETTER REMOVE THAT FROM THE TREE
+          tags.removeAt(i);
+        }
+      }
+    }
+
+    return tags;
+  }
+
+  void upload() async{
+
+    await uploadAttachments();
+
+    HtmlHelper html = HtmlHelper();
+    List<HtmlTag> tags = prepareHtmlTagsForUpload();
+    String textHtml = html.convertListToHtml(tags);
+
+    Map jsonObj = {
+      'title': title,
+      'html'  : textHtml
+    };
+
+    print(jsonObj);
+
+  }
+
 
   Map toJson() {
     Map jsonObj = {

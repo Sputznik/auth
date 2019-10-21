@@ -1,20 +1,15 @@
 import 'dart:ui';
-
 import 'package:auth/editor_view.dart';
-
 import 'package:flutter/material.dart';
-
 import '../models/post_data.dart';
 import 'post_options.dart';
 import 'image_cover.dart';
 import 'image_picker_dialog.dart';
-
 import 'package:provider/provider.dart';
 import 'package:auth/models/posts_data.dart';
 
 class PostTile extends StatefulWidget {
   final PostData post;
-
   PostTile({@required this.post});
 
   @override
@@ -29,6 +24,7 @@ class _PostTileState extends State<PostTile> {
   Widget build(BuildContext context) {
 
     if (post != null) {
+      //post.upload();
       return buildItem(context);
     }
     return SizedBox.shrink();
@@ -49,22 +45,11 @@ class _PostTileState extends State<PostTile> {
                   mainAxisAlignment: MainAxisAlignment.start,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: <Widget>[
-                    Text(
-                      post.getTitle().toUpperCase(),
-                      style:
-                          TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                    ),
+                    buildPostTitle(context),
                     SizedBox(height: 5.0),
-                    Text(
-                      post.getContent().toPlainText().replaceAll('\n', ' '),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                    ),
+                    buildPostExcerpt(context),
                     SizedBox(height: 20.0),
-                    Text(post.getCreatedAt(),
-                        style: TextStyle(fontWeight: FontWeight.w300))
+                    buildPostDate(context),
                   ],
                 ),
               ),
@@ -77,6 +62,31 @@ class _PostTileState extends State<PostTile> {
           )
         ],
       ),
+    );
+  }
+
+  Widget buildPostTitle(context){
+    return Text(
+      post.getTitle().toUpperCase(),
+      style:
+      TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+      maxLines: 2,
+      overflow: TextOverflow.ellipsis,
+    );
+  }
+
+  Widget buildPostExcerpt(context){
+    return Text(
+      post.getContent().toPlainText().replaceAll('\n', ' '),
+      maxLines: 2,
+      overflow: TextOverflow.ellipsis,
+    );
+  }
+
+  Widget buildPostDate(context){
+    return Text(
+        post.getCreatedAt(),
+        style: TextStyle(fontWeight: FontWeight.w300)
     );
   }
 

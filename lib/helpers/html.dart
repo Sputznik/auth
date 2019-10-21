@@ -80,10 +80,12 @@ class HtmlTag {
 
 class HtmlHelper {
   String convertToHtml(NotusDocument document) {
-    String html = "";
     final List<HtmlTag> tags = convertToJson(document);
-    //print(tags);
+    return convertListToHtml(tags);
+  }
 
+  String convertListToHtml(List<HtmlTag> tags){
+    String html = "";
     for (int i = 0; i < tags.length; i++) {
       html += tags[i].toHtml();
     }
