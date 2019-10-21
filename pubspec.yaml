@@ -29,6 +29,7 @@ dependencies:
   quill_delta:
   image_picker:
   timeago:
+  provider:
 
 
 

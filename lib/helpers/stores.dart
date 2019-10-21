@@ -1,11 +1,12 @@
 import 'dart:io';
 
-import 'package:auth/postdata.dart';
+import 'package:auth/models/post_data.dart';
 
 import 'package:path/path.dart';
 
 import 'storage.dart';
 
+/*
 class BaseStore{
 
   InternalStorage store;
@@ -47,6 +48,7 @@ class BaseStore{
 
 }
 
+
 class PostsStore extends BaseStore{
 
   PostsStore(){ store = InternalStorage('posts2.json'); }
@@ -64,11 +66,7 @@ class MediaStorage extends BaseStore{
     store = InternalStorage('medialib.json');
   }
 
-  /*
-  * CHECK IF THE LOCAL FILE EXISTS IN THE MEDIA STORAGE
-  * IF YES AND THE NETWORK URL IS NOT EMPTY THEN PASS THE NETWORK URL
-  * ELSE PASS THE LOCAL PATH OF THE FILE
-  * */
+
   Future<String> saveAsMediaAttachment(MediaAttachment media) async {
     await update(media.id, media.toJson());
     return media.id;
@@ -83,13 +81,6 @@ class MediaStorage extends BaseStore{
     return null;
   }
 
-  MediaAttachment createMediaAttachment(File file){
-    return MediaAttachment({
-      'fileName' : basename(file.path),
-      'localFile' : file.path
-    });
-  }
-
   MediaAttachment getMediaAttachment(String id){
     Map fileContents = getStoreContents();
     if(fileContents.containsKey(id)){
@@ -99,3 +90,5 @@ class MediaStorage extends BaseStore{
   }
 
 }
+
+*/

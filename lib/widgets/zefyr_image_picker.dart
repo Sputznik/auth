@@ -1,12 +1,11 @@
-import 'package:auth/postdata.dart';
+import '../models/media_data.dart';
+import 'package:auth/models/post_data.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:zefyr/zefyr.dart';
-import 'dart:io';
-import 'io/stores.dart';
+import 'image_cover.dart';
 
 class ToolbarDelegate implements ZefyrToolbarDelegate {
-
   static const kDefaultButtonIcons = {
     ZefyrToolbarAction.bold: Icons.format_bold,
     ZefyrToolbarAction.italic: Icons.format_italic,
@@ -83,9 +82,11 @@ class ToolbarDelegate implements ZefyrToolbarDelegate {
 }
 
 class ImageDelegate implements ZefyrImageDelegate<ImageSource> {
-  final MediaStorage storage;
+  //final MediaStorage storage;
 
-  ImageDelegate(this.storage);
+  final PostData post;
+
+  ImageDelegate(this.post);
 
   @override
   ImageSource get cameraSource => ImageSource.camera;
@@ -94,17 +95,16 @@ class ImageDelegate implements ZefyrImageDelegate<ImageSource> {
   ImageSource get gallerySource => ImageSource.gallery;
 
   @override
-  Widget buildImage(BuildContext context, String mediaID) {
+  Widget buildImage(BuildContext context, String id) {
+    int index = int.parse(id);
 
-    String path = storage.getLocalFilePath(mediaID);
+    MediaAttachment media = post.getEachAttachment(index);
 
-    if( path == null ){ return Container(); }
+    if (index == null || media == null) {
+      return Container();
+    }
 
-    File file = File(path);
-    return Container(
-      decoration: BoxDecoration(
-          image: DecorationImage(image: FileImage(file), fit: BoxFit.cover)),
-    );
+    return ImageCoverWidget(media: media);
   }
 
   @override
@@ -112,13 +112,8 @@ class ImageDelegate implements ZefyrImageDelegate<ImageSource> {
     final file = await ImagePicker.pickImage(source: source);
     if (file == null) return null;
 
-    final MediaAttachment mediaAttachment = storage.createMediaAttachment(file);
+    final MediaAttachment media = post.createMediaAttachmentFromFile(file);
 
-    final String imageSource = await storage.saveAsMediaAttachment(mediaAttachment);
-
-    // Use my storage service to upload selected file. The uploadImage method
-    // returns unique ID of newly uploaded image on my server.
-    return imageSource;
-
+    return post.addAttachment(media).toString();
   }
 }

@@ -1,14 +1,29 @@
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
-import "postdata.dart";
+import 'models/post_data.dart';
 import './editor_view.dart';
+
+
+import 'models/posts_data.dart';
+
 import 'archives_view.dart';
 
-import 'demo_view.dart';
+import 'package:provider/provider.dart';
 
 void main() {
-  runApp(QuickStartApp());
+  //Provider.debugCheckInvalidValueType = null;
+  runApp(
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(builder: (context) => PostsCollection()),
+      ],
+      child: QuickStartApp(),
+    ),
+  );
+
+  //runApp(QuickStartApp());
 }
 
 class QuickStartApp extends StatelessWidget {
@@ -26,10 +41,9 @@ class QuickStartApp extends StatelessWidget {
           brightness: Brightness.light
       ),
       title: 'Notes',
-      initialRoute: '/demo',
+      initialRoute: '/',
       routes: {
-        "/demo": (context) => PostsList(),
-        "/": (context) => Archives(),
+        "/": (context) => PostsList(),
         "/editor": (context) => EditorPage(post),
       },
     );
@@ -51,108 +65,3 @@ class HomePage extends StatelessWidget {
     );
   }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//class Homepage extends StatefulWidget {
-//  @override
-//  State<StatefulWidget> createState() {
-//    return _Homepage();
-//  }
-//}
-
-//class _Homepage extends State<Homepage> {
-//  @override
-//  Widget build(BuildContext context) {
-//    return MaterialApp(
-//      debugShowCheckedModeBanner: false,
-//      theme: ThemeData(primarySwatch: Colors.lightBlue),
-//      home: MyAppPage(),
-//    );
-//  }
-
-// Base URL for our wordpress API
-//  final String apiUrl = "https://churchbuzz.in/wp-json/wp/v2/users/me";
-
-  // Empty list for our posts
-//  List posts;
-
-  // Function to fetch list of posts
-//  Future<String> getPosts() async {
-//    String adminName = 'samvthom16@gmail.com';
-//    String adminKey = 'MqBM wtxS heJy 6swD 3c3k C5RL';
-//    String str = adminName + ':' + adminKey;
-//    String base64 = base64Encode(utf8.encode(str));
-//    print(base64);
-//    var $headers = {
-//      "Accept": "application/json",
-//      "Authorization": 'Basic $base64'
-//    };
-//    http.Response res =
-//    await http.get(Uri.encodeFull(apiUrl), headers: $headers);
-//    print(res.body);
-//  }
-
-  // Function to create post
-//  Future<String> createPost() async {
-//    String adminName = 'samvthom16@gmail.com';
-//    String adminKey = 'MqBM wtxS heJy 6swD 3c3k C5RL';
-//    String str = adminName + ':' + adminKey;
-//    String base64 = base64Encode(utf8.encode(str));
-
-//    final Map<String, dynamic> postData = {
-////      'Authorization': base64,
-//      'title': 'Sample',
-//      'content': 'Sample Content',
-//      'status': 'draft'
-//    };
-//    final createPostUrl = 'https://churchbuzz.in/wp-json/wp/v2/posts?title='+title+'&content='+content+'&status='+status;
-//    final createPostUrl = 'https://churchbuzz.in/wp-json/wp/v2/posts';
-//    var $headers = {
-//      "Accept": "application/json",
-//      "Authorization": 'Basic $base64'
-//    };
-//    var response =
-//        await http.post(createPostUrl, body: postData, headers: $headers);
-//    return response.body;
-//
-//    print('Response status: ${response.statusCode}');
-//    print('Response body: ${response.body}');
-
-//    var data = { 'title' : 'My first post' };
-//    http.Request(
-//        'https://jsonplaceholder.typicode.com/posts',
-//        method: 'POST',
-//        sendData: json.encode(data),
-//        requestHeaders: {
-//          'Content-Type': 'application/json; charset=UTF-8'
-//        }
-//    ).then((resp) {
-//      print(resp.responseUrl);
-//      print(resp.responseText);
-//    });
-
-//    print(res.body);
-//  print(createPostUrl);
-//  }
-//}

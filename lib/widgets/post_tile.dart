@@ -1,61 +1,47 @@
 import 'dart:ui';
-import 'dart:io';
+
 import 'package:auth/editor_view.dart';
 
-//import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import '../io/stores.dart';
-import "../postdata.dart";
+
+import '../models/post_data.dart';
 import 'post_options.dart';
+import 'image_cover.dart';
 import 'image_picker_dialog.dart';
+
+import 'package:provider/provider.dart';
+import 'package:auth/models/posts_data.dart';
 
 class PostTile extends StatefulWidget {
   final PostData post;
 
-  final PostsStore store;
-
-  PostTile(this.post, this.store);
+  PostTile({@required this.post});
 
   @override
-  _PostTileState createState() => _PostTileState(this.post, this.store);
+  _PostTileState createState() => _PostTileState(this.post);
 }
 
 class _PostTileState extends State<PostTile> {
   PostData post;
 
-  final PostsStore store;
-
-  _PostTileState(this.post, this.store);
+  _PostTileState(this.post);
 
   Widget build(BuildContext context) {
+
     if (post != null) {
       return buildItem(context);
     }
     return SizedBox.shrink();
   }
 
-  ImageProvider buildFeaturedImage(BuildContext context) {
-    ImageProvider image;
-    image = AssetImage('assets/default.png');
-    if (post.featuredImage != null) {
-      image = FileImage(post.getFeaturedImage());
-    }
-    return image;
-  }
-
   Widget buildItem(context) {
+
     return Card(
       child: Column(
         children: <Widget>[
           Row(
             children: <Widget>[
-              Container(
-                width: 120,
-                height: 120,
-                decoration: BoxDecoration(
-                    image: DecorationImage(
-                        image: buildFeaturedImage(context), fit: BoxFit.cover)),
-              ),
+              ImageCoverWidget( media: post.featuredImage, width: 120, height: 120,),
               Container(
                 width: 195,
                 padding: EdgeInsets.all(10),
@@ -95,6 +81,9 @@ class _PostTileState extends State<PostTile> {
   }
 
   void onSelectedOption(selectedItem) {
+
+    PostsCollection postsCollection = Provider.of<PostsCollection>(context, listen:false);
+
     switch (selectedItem) {
       case 'edit':
         openEditor();
@@ -104,16 +93,22 @@ class _PostTileState extends State<PostTile> {
                 context: context,
                 builder: (BuildContext context) => ImagePickerDialog())
             .then((newImage) {
-          setState(() {
-            post.setFeaturedImage(newImage);
-          });
+          if (newImage != null) {
+            setState(() {
+              post.featuredImage = post.createMediaAttachmentFromFile(newImage);
+            });
+            postsCollection.updateItem(post);
+          }
         });
         break;
       case "delete":
+
+        postsCollection.deleteItem(post);
+
         setState(() {
           post = null;
         });
-        store.delete(post.id);
+
         break;
       case "publish":
         /*
@@ -136,13 +131,13 @@ class _PostTileState extends State<PostTile> {
             context, MaterialPageRoute(builder: (context) => EditorPage(post)))
         .then((newPost) {
       if (newPost.toString() != oldPostData) {
-        // SAVE TO FILE
-        store.saveAsPost(post);
 
         // REBUILD THE UI
         setState(() {
           post = newPost;
         });
+
+        Provider.of<PostsCollection>(context, listen:false).updateItem(post);
       }
     });
   }

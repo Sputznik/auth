@@ -1,27 +1,10 @@
-import 'dart:convert';
-
-
 import 'package:zefyr/zefyr.dart';
-import 'dart:math';
 import 'package:timeago/timeago.dart' as timeago;
 import 'dart:io';
-import 'html.dart';
-
-import "io/stores.dart";
-
-class BaseData {
-  String id;
-
-  String getRandomID() {
-    var rng = new Random();
-    return base64.encode([rng.nextInt(10), rng.nextInt(10)]);
-  }
-
-  Map toJson() => {};
-
-  String toString() => this.toJson().toString();
-
-}
+import '../helpers/html.dart';
+import 'package:path/path.dart';
+import 'base_data.dart';
+import 'media_data.dart';
 
 class PostData extends BaseData {
 
@@ -33,7 +16,9 @@ class PostData extends BaseData {
 
   DateTime created_at;
 
-  File featuredImage;
+  List<MediaAttachment> attachments;
+
+  MediaAttachment featuredImage;
 
   PostData(Map data) {
     this.id = data.containsKey('id') ? data['id'] : getRandomID();
@@ -41,8 +26,16 @@ class PostData extends BaseData {
         ? DateTime.parse(data['created_at'])
         : DateTime.now();
 
+    this.featuredImage = MediaAttachment({});
     if (data.containsKey('featuredImage')) {
-      setFeaturedImage(File(data['featuredImage']));
+      this.featuredImage = MediaAttachment(data['featuredImage']);
+    }
+
+    this.attachments = [];
+    if (data.containsKey('attachments') && data['attachments'] != null) {
+      for(int i=0; i<data['attachments'].length; i++){
+        attachments.add(MediaAttachment(data['attachments'][i]));
+      }
     }
 
     // SET TITLE OF THE POST
@@ -70,11 +63,6 @@ class PostData extends BaseData {
 
   NotusDocument getContent() => this.content;
 
-  File getFeaturedImage() => this.featuredImage;
-
-  void setFeaturedImage(File featuredImage) =>
-      this.featuredImage = featuredImage;
-
   String getCreatedAt() => timeago.format(created_at);
 
   String getHtmlContent() {
@@ -87,17 +75,26 @@ class PostData extends BaseData {
     return html.convertToJson(content);
   }
 
-  List<MediaAttachment> getAttachments(mediaStorage) {
+  /*
+  Future getAttachments() async{
+
+    MediaStorage mediaStorage = MediaStorage();
+
+    await mediaStorage.read();
+
     Map mediaContents = mediaStorage.getStoreContents();
+
+    //print(mediaContents);
+
     List<MediaAttachment> attachments = [];
-    /*
+
     List<HtmlTag> tags = getHtmlJson();
     for (int i = 0; i < tags.length; i++) {
 
       if (tags[i].tag == 'img' && tags[i].attributes.containsKey('src')) {
-        String media_id  = tags[i].attributes['src'];
+        String mediaId  = tags[i].attributes['src'];
 
-        MediaAttachment temp = mediaStorage.getMediaAttachment(media_id);
+        MediaAttachment temp = mediaStorage.getMediaAttachment(mediaId);
 
         if(temp != null){
           attachments.add(temp);
@@ -105,15 +102,17 @@ class PostData extends BaseData {
 
       }
     }
-    */
-    return attachments;
+
+    print(attachments);
+
+    //return attachments;
   }
 
   void uploadAttachments() async {
     MediaStorage mediaStorage = MediaStorage();
     await mediaStorage.read();
 
-    List<MediaAttachment> attachments = getAttachments(mediaStorage);
+    List<MediaAttachment> attachments = []; //getAttachments();
 
     print('attachments');
 
@@ -123,8 +122,7 @@ class PostData extends BaseData {
       attachments[i].upload(mediaStorage);
     }
   }
-
-
+  */
 
   Map toJson() {
     Map jsonObj = {
@@ -132,70 +130,33 @@ class PostData extends BaseData {
       "title": this.title,
       "created_at": this.created_at.toIso8601String(),
       "content": this.content.toJson(),
+      'attachments': this.attachments
     };
 
-    if (this.featuredImage != null && this.featuredImage.path != "") {
-      jsonObj['featuredImage'] = this.featuredImage.path;
+    if (this.featuredImage != null) {
+      jsonObj['featuredImage'] = this.featuredImage.toJson();
     }
 
     return jsonObj;
   }
 
+  MediaAttachment createMediaAttachmentFromFile(File file){
+    return MediaAttachment({
+      'fileName' : basename(file.path),
+      'localFile' : file.path
+    });
+  }
 
+  int addAttachment(MediaAttachment media){
+    attachments.add(media);
+    return attachments.indexOf(media);
+  }
+
+  MediaAttachment getEachAttachment(int index){
+    if (index < attachments.length){
+      return attachments[index];
+    }
+    return null;
+  }
 }
 
-class MediaAttachment extends BaseData {
-  String id;
-
-  String fileName;
-
-  File localFile;
-
-  String networkUrl;
-
-  MediaAttachment(Map data) {
-    this.id = data.containsKey('id') ? data['id'] : getRandomID();
-
-    this.fileName = data.containsKey('fileName') ? data['fileName'] : "item";
-
-    if (data.containsKey('localFile')) {
-      setLocalFile(File(data['localFile']));
-    }
-
-    if (data.containsKey('networkUrl')) {
-      setNetworkUrl(data['networkUrl']);
-    }
-  }
-
-  File getLocalFile() => this.localFile;
-
-  void setLocalFile(localFile) => this.localFile = localFile;
-
-  String getNetwrkUrl() => this.networkUrl;
-
-  void setNetworkUrl(networkUrl) => this.networkUrl = networkUrl;
-
-  Map toJson() {
-    return {
-      'id': id,
-      'fileName': fileName,
-      'localFile': localFile.path,
-      'networkUrl': networkUrl
-    };
-  }
-
-  // SEND TO SERVER
-  Future upload(MediaStorage mediaStorage) async {
-
-    // TEST RUN THAT THE SERVER WILL RETURN AN OBJECT WHICH WILL CONTAIN THE NETWORK URL OF THE FILE
-    await Future.delayed(const Duration(milliseconds: 500));
-    setNetworkUrl("https://churchbuzz.in/wp-content/uploads/2019/08/zekeriya-sen-zY7ArPAVino-unsplash-e1567068913528.jpg");
-
-    // SAVE THE NEW NETWORK URL TO THE LOCAL SYSTEM
-    await mediaStorage.saveAsMediaAttachment(this);
-
-
-  }
-
-
-}

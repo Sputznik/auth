@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'package:zefyr/zefyr.dart';
 import 'dart:math';
-import 'zefyr_image_picker.dart';
-import "postdata.dart";
-import "io/stores.dart";
+import 'widgets/zefyr_image_picker.dart';
+import 'models/post_data.dart';
+
 
 class EditorPage extends StatefulWidget {
   final PostData post;
@@ -17,13 +17,12 @@ class EditorPage extends StatefulWidget {
 
 class EditorPageState extends State<EditorPage> {
   TextEditingController postTitleController;
-  MediaStorage mediaStorage;
+
   var postTitle;
 
   EditorPageState() {
     //Post title field
     this.postTitle = createPostTitleWidget("Untitled");
-    this.mediaStorage = MediaStorage();
   }
 
   /// Allows to control the editor and the document.
@@ -39,19 +38,21 @@ class EditorPageState extends State<EditorPage> {
     super.initState();
     _focusNode = FocusNode();
 
+    /*
     // READ THE MEDIA CONTENTS TO INITIALIZE THE MEDIA STORAGE ELEMENTS
     mediaStorage.read().then((_){
-      setState(() {
-        _controller = ZefyrController(widget.post.getContent());
-        postTitle = createPostTitleWidget(widget.post.getTitle());
-        _imgDelegate = ImageDelegate(mediaStorage);
-      });
+
     });
+    */
 
-
+    setState(() {
+      _controller = ZefyrController(widget.post.getContent());
+      postTitle = createPostTitleWidget(widget.post.getTitle());
+      _imgDelegate = ImageDelegate(widget.post);
+    });
   }
 
-  TextFormField createPostTitleWidget(String text){
+  TextFormField createPostTitleWidget(String text) {
     postTitleController = TextEditingController(text: text);
     return TextFormField(
       keyboardType: TextInputType.multiline,
@@ -107,15 +108,15 @@ class EditorPageState extends State<EditorPage> {
               imageDelegate: _imgDelegate,
               //selectionControls: SelectionDelegate(),
               toolbarDelegate: ToolbarDelegate(),
-                //ZefyrToolbarDelegate toolbarDelegate
+              //ZefyrToolbarDelegate toolbarDelegate
             ),
           );
 
     return WillPopScope(
       // GET CURRENT POST & PASS THE POST DATA TO THE PREVIOUS SCREEN FOR SAVING
       onWillPop: () {
-        PostData post = getCurrentPost();
-        Navigator.pop(context, post);
+        updateParentPost();
+        Navigator.pop(context, widget.post);
         return Future<bool>.value(false);
       },
       child: Scaffold(
@@ -131,14 +132,13 @@ class EditorPageState extends State<EditorPage> {
           titleSpacing: 0,
           actions: <Widget>[
             IconButton(
-              onPressed: (){
-                _showDialog();
-              },
-              icon: Icon(
-                Icons.edit,
-                color: Colors.white,
-              )
-            )
+                onPressed: () {
+                  _showDialog();
+                },
+                icon: Icon(
+                  Icons.edit,
+                  color: Colors.white,
+                ))
           ],
           //automaticallyImplyLeading: false,
         ),
@@ -147,14 +147,13 @@ class EditorPageState extends State<EditorPage> {
     );
   }
 
-  PostData getCurrentPost(){
+  void updateParentPost() {
     widget.post.title = getCurrentTitle();
     widget.post.content = getCurrentDoc();
-    return widget.post;
   }
 
-  String getCurrentTitle() => postTitleController.text != "" ? postTitleController.text : "Untitled";
+  String getCurrentTitle() =>
+      postTitleController.text != "" ? postTitleController.text : "Untitled";
 
   NotusDocument getCurrentDoc() => _controller.document;
-
 }
