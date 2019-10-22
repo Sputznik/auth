@@ -7,6 +7,7 @@ import 'image_cover.dart';
 import 'image_picker_dialog.dart';
 import 'package:provider/provider.dart';
 import 'package:auth/models/posts_data.dart';
+import 'package:auth/helpers/wp.dart';
 
 class PostTile extends StatefulWidget {
   final PostData post;
@@ -24,6 +25,8 @@ class _PostTileState extends State<PostTile> {
   Widget build(BuildContext context) {
 
     if (post != null) {
+
+      //print(post.featuredImage);
       //post.upload();
       return buildItem(context);
     }

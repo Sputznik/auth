@@ -125,6 +125,11 @@ class PostData extends BaseData {
     return tags;
   }
 
+  /*
+  * 1. UPLOAD ALL ATTACHMENTS
+  * 2. UPLOAD THE POST
+  * 3. UPLOAD THE  POST META INFORMATION
+  */
   void upload() async{
 
     await uploadAttachments();

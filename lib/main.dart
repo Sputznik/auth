@@ -12,8 +12,18 @@ import 'archives_view.dart';
 
 import 'package:provider/provider.dart';
 
+import "helpers/wp.dart";
+
+
 void main() {
-  //Provider.debugCheckInvalidValueType = null;
+
+  // SET THE BASE URL FOR THE WORDPRESS API
+  Wordpress.getInstance().initialize('https://churchbuzz.in/wp-json/');
+
+  //Wordpress.getInstance().initialize('http://192.168.43.253/wordpress/wp-json/');
+
+
+
   runApp(
     MultiProvider(
       providers: [

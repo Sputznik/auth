@@ -8,6 +8,8 @@ import 'widgets/posts_list.dart';
 import 'package:provider/provider.dart';
 import 'models/posts_data.dart';
 
+import 'helpers/wp.dart';
+
 
 class PostsList extends StatefulWidget {
   @override
@@ -28,6 +30,7 @@ class _PostsState extends State<PostsList> {
 
   @override
   Widget build(BuildContext context) {
+    Wordpress.getInstance().test();
     return Scaffold(
       appBar: AppBar(
         title: Text('Notes'),
