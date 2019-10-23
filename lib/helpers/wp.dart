@@ -49,6 +49,12 @@ class Wordpress{
     return parseResponse(response);
   }
 
+  deleteResponse(endPoint) async{
+    String url = baseUrl + endPoint;
+    final response = await http.delete(url, headers: getUrlHeaders());
+    return parseResponse(response);
+  }
+
   String getPostsUrl(){ return "wp/v2/posts"; }
 
   String getMediaUrl(){ return "wp/v2/media"; }
@@ -74,6 +80,18 @@ class Wordpress{
     return await postResponse(endPoint, postData, getUrlHeaders());
   }
 
+  updatePost({@required postData, @required int postId, endPoint}) async{
+    if(endPoint == null){
+      endPoint = getPostsUrl();
+    }
+    endPoint += "/" + postId.toString();
+    return await postResponse(endPoint, postData, getUrlHeaders());
+  }
+
+  deletePost(int postId) async{
+    String endPoint = getPostsUrl() + "/" + postId.toString();
+    return await deleteResponse(endPoint);
+  }
 
   Future<ByteData> toByteData({ @required file, ImageByteFormat format = ImageByteFormat.rawRgba}) async{
     ByteData data;
@@ -128,6 +146,9 @@ class Wordpress{
   }
 
   void test() async{
+
+
+
     /*
     File file = File('/storage/emulated/0/Android/data/com.example.auth/files/Pictures/scaled_images.png');
     var response = await createMedia(file);

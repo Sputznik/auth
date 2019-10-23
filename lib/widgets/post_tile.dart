@@ -11,6 +11,7 @@ import 'package:auth/helpers/wp.dart';
 
 class PostTile extends StatefulWidget {
   final PostData post;
+
   PostTile({@required this.post});
 
   @override
@@ -20,27 +21,30 @@ class PostTile extends StatefulWidget {
 class _PostTileState extends State<PostTile> {
   PostData post;
 
+  bool isLoading = false;
+
   _PostTileState(this.post);
 
   Widget build(BuildContext context) {
-
     if (post != null) {
-
       //print(post.featuredImage);
-      //post.upload();
+      //post.featuredImage.upload();
       return buildItem(context);
     }
     return SizedBox.shrink();
   }
 
   Widget buildItem(context) {
-
     return Card(
       child: Column(
         children: <Widget>[
           Row(
             children: <Widget>[
-              ImageCoverWidget( media: post.featuredImage, width: 120, height: 120,),
+              ImageCoverWidget(
+                media: post.featuredImage,
+                width: 120,
+                height: 120,
+              ),
               Container(
                 width: 195,
                 padding: EdgeInsets.all(10),
@@ -56,11 +60,7 @@ class _PostTileState extends State<PostTile> {
                   ],
                 ),
               ),
-              Container(
-                padding: EdgeInsets.all(0),
-                width: 30,
-                child: PostOptionsMenu(onSelectedOption),
-              ),
+              isLoading ? buildLoader(context) : buildPostOptions(context),
             ],
           )
         ],
@@ -68,17 +68,34 @@ class _PostTileState extends State<PostTile> {
     );
   }
 
-  Widget buildPostTitle(context){
+  Widget buildLoader(context) {
+    return Container(
+        width: 20,
+        height: 20,
+        child: CircularProgressIndicator(
+          strokeWidth: 2.0,
+          valueColor: AlwaysStoppedAnimation<Color>(Colors.black87),
+        ));
+  }
+
+  Widget buildPostOptions(context) {
+    return Container(
+      padding: EdgeInsets.all(0),
+      width: 30,
+      child: PostOptionsMenu(onSelectedOption, post),
+    );
+  }
+
+  Widget buildPostTitle(context) {
     return Text(
       post.getTitle().toUpperCase(),
-      style:
-      TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
       maxLines: 2,
       overflow: TextOverflow.ellipsis,
     );
   }
 
-  Widget buildPostExcerpt(context){
+  Widget buildPostExcerpt(context) {
     return Text(
       post.getContent().toPlainText().replaceAll('\n', ' '),
       maxLines: 2,
@@ -86,49 +103,99 @@ class _PostTileState extends State<PostTile> {
     );
   }
 
-  Widget buildPostDate(context){
-    return Text(
-        post.getCreatedAt(),
-        style: TextStyle(fontWeight: FontWeight.w300)
+  Widget buildPostDate(context) {
+    return Row(
+      children: <Widget>[
+        Text(
+          post.getCreatedAt(),
+          style: TextStyle(fontWeight: FontWeight.w300),
+        ),
+        SizedBox(
+          width: 5.0,
+        ),
+        buildPostStatus(context)
+      ],
+    );
+  }
+
+  Widget buildPostStatus(context) {
+    if (post.id > 0) {
+      return Icon(
+        Icons.check_circle,
+        size: 15.0,
+        color: Colors.green,
+      );
+    }
+    return Icon(
+      Icons.autorenew,
+      size: 15.0,
     );
   }
 
   void onSelectedOption(selectedItem) {
-
-    PostsCollection postsCollection = Provider.of<PostsCollection>(context, listen:false);
+    PostsCollection postsCollection =
+        Provider.of<PostsCollection>(context, listen: false);
 
     switch (selectedItem) {
       case 'edit':
-        openEditor();
+        actionEdit(postsCollection);
         break;
       case "set-featured":
-        showDialog(
-                context: context,
-                builder: (BuildContext context) => ImagePickerDialog())
-            .then((newImage) {
-          if (newImage != null) {
-            setState(() {
-              post.featuredImage = post.createMediaAttachmentFromFile(newImage);
-            });
-            postsCollection.updateItem(post);
-          }
-        });
+        actionFeaturedImage(postsCollection);
         break;
       case "delete":
-
-        postsCollection.deleteItem(post);
-
-        setState(() {
-          post = null;
-        });
-
+        actionDelete(postsCollection);
         break;
       case "publish":
-        /*
-         * OPERATION TO SEND TO API AND GET IT PUBLISHED USING WP API
-         */
+        actionPublish(postsCollection);
         break;
     }
+  }
+
+  void actionDelete(postsCollection) async {
+    setState(() {
+      isLoading = true;
+    });
+
+    await postsCollection.deleteItem(post);
+
+    setState(() {
+      post = null;
+    });
+  }
+
+  void actionFeaturedImage(postsCollection) async {
+    setState(() {
+      isLoading = true;
+    });
+
+    showDialog(
+      context: context,
+      builder: (BuildContext context) => ImagePickerDialog(),
+    ).then((newImage) {
+      if (newImage != null) {
+        setState(() {
+          post.featuredImage = post.createMediaAttachmentFromFile(newImage);
+          isLoading = false;
+        });
+        postsCollection.updateItem(post);
+      }
+    });
+  }
+
+  /*
+   * OPERATION TO SEND TO API AND GET IT PUBLISHED USING WP API
+   */
+  void actionPublish(postsCollection) async {
+    setState(() {
+      isLoading = true;
+    });
+
+    await postsCollection.publish(post);
+
+    setState(() {
+      isLoading = false;
+    });
   }
 
   /*
@@ -136,13 +203,16 @@ class _PostTileState extends State<PostTile> {
   * WAITS FOR THE POP EVENT
   * SAVES THE NEW POST RECEIVED & REBUILDS THE UI ONLY IF THE UPDATED POST HAS CHANGED
   */
-  void openEditor() async {
+  void actionEdit(postsCollection) async {
     // TAKE A SNAPSHOT OF THE DATA AS STRING BEFORE IT IS SENT
     String oldPostData = post.toString();
 
     await Navigator.push(
-            context, MaterialPageRoute(builder: (context) => EditorPage(post)))
-        .then((newPost) {
+      context,
+      MaterialPageRoute(
+        builder: (context) => EditorPage(post),
+      ),
+    ).then((newPost) {
       if (newPost.toString() != oldPostData) {
 
         // REBUILD THE UI
@@ -150,7 +220,7 @@ class _PostTileState extends State<PostTile> {
           post = newPost;
         });
 
-        Provider.of<PostsCollection>(context, listen:false).updateItem(post);
+        postsCollection.updateItem(post);
       }
     });
   }

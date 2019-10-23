@@ -1,3 +1,4 @@
+import 'package:auth/helpers/wp.dart';
 import 'package:zefyr/zefyr.dart';
 import 'package:timeago/timeago.dart' as timeago;
 import 'dart:io';
@@ -8,7 +9,7 @@ import 'media_data.dart';
 
 class PostData extends BaseData {
 
-  String id;
+  int id;
 
   String title;
 
@@ -20,8 +21,10 @@ class PostData extends BaseData {
 
   MediaAttachment featuredImage;
 
+  Map response;
+
   PostData(Map data) {
-    this.id = data.containsKey('id') ? data['id'] : getRandomID();
+    this.id = data.containsKey('id') ? data['id'] : 0;
     this.created_at = data.containsKey('created_at')
         ? DateTime.parse(data['created_at'])
         : DateTime.now();
@@ -52,6 +55,11 @@ class PostData extends BaseData {
         {"insert": "\n"}
       ]);
     }
+
+    if(data.containsKey('response')){
+      this.response = data['response'];
+    }
+
   }
 
   void setTitle(String title) => this.title = title;
@@ -95,7 +103,7 @@ class PostData extends BaseData {
     return inlineAttachments;
   }
 
-  void uploadAttachments() async {
+  Future uploadAttachments() async {
     List<MediaAttachment> attachments = getInlineAttachments();
     for (int i = 0; i < attachments.length; i++) {
       await attachments[i].upload();
@@ -126,26 +134,52 @@ class PostData extends BaseData {
   }
 
   /*
-  * 1. UPLOAD ALL ATTACHMENTS
-  * 2. UPLOAD THE POST
-  * 3. UPLOAD THE  POST META INFORMATION
-  */
-  void upload() async{
-
-    await uploadAttachments();
+   * MAKE SURE THIS FUNCTION IS CALLED AFTER THE INLINE ATTACHMENTS ARE UPLOADED
+   *  */
+  getDataForUpload(){
 
     HtmlHelper html = HtmlHelper();
     List<HtmlTag> tags = prepareHtmlTagsForUpload();
     String textHtml = html.convertListToHtml(tags);
 
-    Map jsonObj = {
+    Map data = {
       'title': title,
-      'html'  : textHtml
+      'content': textHtml,
+      'status': 'draft'
     };
 
-    print(jsonObj);
+    if(featuredImage != null && featuredImage.id != null && featuredImage.id > 0){
+      data['featured_media'] = featuredImage.id.toString();
+    }
+
+    return data;
+  }
+
+  /*
+  * 1. UPLOAD ALL ATTACHMENTS
+  * 2. UPLOAD THE POST
+  * 3. UPLOAD THE  POST META INFORMATION
+  *
+  void upload() async{
+    await uploadAttachments();
+
+    if(this.id == 0){
+      print('post upload');
+
+      final postData = getDataForUpload();
+
+      var response = await Wordpress.getInstance().createPost(postData: postData);
+      if(response.containsKey('id')){
+        this.response = response;
+        this.id = response['id'];
+        print(response);
+      }
+    }
+
+    //print(jsonObj);
 
   }
+  */
 
 
   Map toJson() {
@@ -159,6 +193,10 @@ class PostData extends BaseData {
 
     if (this.featuredImage != null) {
       jsonObj['featuredImage'] = this.featuredImage.toJson();
+    }
+
+    if (this.response != null) {
+      jsonObj['response'] = this.response;
     }
 
     return jsonObj;

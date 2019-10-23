@@ -11,20 +11,20 @@ class InternalStorage{
 
   File file;
   String fileName;
-  Map contents;
+  List contents;
 
   InternalStorage(String fileName){
     this.fileName = Directory.systemTemp.path + "/" + fileName;
     this.file = File(getFileName());
-    setContents({});
+    setContents([]);
   }
 
-  Map getContents() => this.contents;
+  List getContents() => this.contents;
 
   void setContents(contents) => this.contents = contents;
 
   // READS FILE CONTENTS AS STRING AND DECODES IT TO JSON FORMAT
-  Future<Map> readFileContents() async {
+  Future<List> readFileContents() async {
     if (await file.exists()) {
       final contentsStr = await file.readAsString();
       setContents(jsonDecode(contentsStr));
@@ -36,15 +36,6 @@ class InternalStorage{
   // WRITES THE CONTENTS INTO THE FILE
   Future writeFileContents() async {
     await file.writeAsString(jsonEncode(getContents()));
-  }
-
-  Future<ByteData> toByteData({ImageByteFormat format = ImageByteFormat.rawRgba}) async{
-    ByteData data;
-    if (await file.exists()) {
-      Uint8List encoded = await file.readAsBytes();
-      data = encoded?.buffer?.asByteData();
-    }
-    return data;
   }
 
   String getFileName() { return this.fileName; }

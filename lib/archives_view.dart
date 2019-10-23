@@ -30,7 +30,7 @@ class _PostsState extends State<PostsList> {
 
   @override
   Widget build(BuildContext context) {
-    Wordpress.getInstance().test();
+    //Wordpress.getInstance().test();
     return Scaffold(
       appBar: AppBar(
         title: Text('Notes'),
@@ -84,6 +84,8 @@ class _PostsState extends State<PostsList> {
     setState(() {
       isLoading = true;
     });
+
+
 
     await Provider.of<PostsCollection>(context, listen:false).read();
 

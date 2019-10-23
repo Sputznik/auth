@@ -1,7 +1,7 @@
 import 'package:auth/helpers/storage.dart';
 import 'package:flutter/material.dart';
-
 import 'package:auth/models/post_data.dart';
+import 'package:auth/helpers/wp.dart';
 
 class PostsCollection extends ChangeNotifier {
   List<PostData> _posts = [];
@@ -10,22 +10,18 @@ class PostsCollection extends ChangeNotifier {
 
   InternalStorage store = InternalStorage('posts2.json');
 
-  Future read() async{
+  Future read() async {
     _posts = [];
     await store.readFileContents();
-    Map fileContents = store.getContents();
-    fileContents.forEach((k, v) {
-      _posts.add(PostData(v));
-    });
+    List data = store.getContents();
+    for (int i = 0; i < data.length; i++) {
+      _posts.add(PostData(data[i]));
+    }
     notifyListeners();
   }
 
-  Future write() async{
-    Map fileContents = {};
-    for(int i=0; i<_posts.length; i++){
-      fileContents[_posts[i].id] = _posts[i];
-    }
-    store.setContents(fileContents);
+  Future write() async {
+    store.setContents(_posts);
     await store.writeFileContents();
   }
 
@@ -35,17 +31,52 @@ class PostsCollection extends ChangeNotifier {
     notifyListeners();
   }
 
-  void deleteItem(PostData post) {
-    bool flag = _posts.remove(post);
+  Future deleteItem(PostData post) async {
+    if (post.id > 0) {
+      await Wordpress.getInstance().deletePost(post.id);
+    }
+    _posts.remove(post);
     write();
     notifyListeners();
   }
 
-  void updateItem(PostData post){
+  Future updateItem(PostData post) async{
+    if (post.id > 0) {
+
+      // UPLOAD ALL THE MEDIA ATTACHMENTS INCLUDING THE FEATURED IMAGE
+      await post.uploadAttachments();
+
+      // GET THE JSON DATA THAT NEEDS TO BE SENT TO THE SERVER
+      final postData = post.getDataForUpload();
+
+      // SEND TO SERVER
+      await Wordpress.getInstance().updatePost(postData: postData, postId: post.id);
+    }
     write();
   }
 
-  String toString(){
+  String toString() {
     return _posts.toString();
+  }
+
+  Future publish(PostData post) async {
+    if (post.id == 0) {
+      // UPLOAD ALL THE MEDIA ATTACHMENTS INCLUDING THE FEATURED IMAGE
+      await post.uploadAttachments();
+
+      // GET THE JSON DATA THAT NEEDS TO BE SENT TO THE SERVER
+      final data = post.getDataForUpload();
+
+      //print(data);
+
+
+      // SEND TO SERVER
+      var response = await Wordpress.getInstance().createPost(postData: data);
+      if(response.containsKey('id')){
+        post.response = response;
+        post.id = response['id'];
+      }
+    }
+    write();
   }
 }

@@ -1,9 +1,11 @@
+import 'package:auth/helpers/wp.dart';
+
 import 'base_data.dart';
 import 'dart:io';
 import 'package:flutter/material.dart';
 
 class MediaAttachment extends BaseData {
-  String id;
+  int id;
 
   String fileName;
 
@@ -11,10 +13,14 @@ class MediaAttachment extends BaseData {
 
   String networkUrl;
 
-  MediaAttachment(Map data) {
-    this.id = data.containsKey('id') ? data['id'] : getRandomID();
+  Map response;
 
-    this.fileName = data.containsKey('fileName') ? data['fileName'] : "item";
+  MediaAttachment(Map data) {
+    this.id = data.containsKey('id') ? data['id'] : 0;
+
+    if (data.containsKey('fileName')) {
+      this.fileName = data['fileName'];
+    }
 
     if (data.containsKey('localFile')) {
       setLocalFile(File(data['localFile']));
@@ -22,6 +28,10 @@ class MediaAttachment extends BaseData {
 
     if (data.containsKey('networkUrl')) {
       setNetworkUrl(data['networkUrl']);
+    }
+
+    if (data.containsKey('response')) {
+      this.response = data['response'];
     }
   }
 
@@ -34,15 +44,14 @@ class MediaAttachment extends BaseData {
   void setNetworkUrl(networkUrl) => this.networkUrl = networkUrl;
 
   Map toJson() {
+    Map jsonObj = {'id': id, 'fileName': fileName, 'networkUrl': networkUrl};
 
-    Map jsonObj = {
-      'id': id,
-      'fileName': fileName,
-      'networkUrl': networkUrl
-    };
-
-    if (this.localFile != null && this.localFile.path !=null) {
+    if (this.localFile != null && this.localFile.path != null) {
       jsonObj['localFile'] = this.localFile.path;
+    }
+
+    if (response != null) {
+      jsonObj['response'] = this.response;
     }
 
     return jsonObj;
@@ -58,17 +67,22 @@ class MediaAttachment extends BaseData {
     return imageProvider;
   }
 
-
-  // SEND TO SERVER
+  /*
+   * 1. SEND TO SERVER ONLY IF LOCAL FILE IS VALID
+   * 2. SAVE THE RESPONSE
+   * 3. SET THE NETWORK URL
+   */
   Future upload() async {
-
-    // TEST RUN THAT THE SERVER WILL RETURN AN OBJECT WHICH WILL CONTAIN THE NETWORK URL OF THE FILE
-    await Future.delayed(const Duration(milliseconds: 500));
-    setNetworkUrl("https://churchbuzz.in/wp-content/uploads/2019/08/zekeriya-sen-zY7ArPAVino-unsplash-e1567068913528.jpg");
-
+    if (localFile != null && this.id == 0) {
+      print('media upload');
+      var response = await Wordpress.getInstance().createMedia(localFile);
+      this.response = response;
+      if (response.containsKey('guid') &&
+          response['guid'].containsKey('rendered') &&
+          response.containsKey('id')) {
+        this.id = response['id'];
+        this.networkUrl = response['guid']['rendered'];
+      }
+    }
   }
-
-
-
-
 }
