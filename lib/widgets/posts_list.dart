@@ -1,21 +1,25 @@
 import 'package:auth/models/post_data.dart';
+import 'package:auth/models/posts_data.dart';
 import 'package:auth/widgets/post_tile.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 class PostList extends StatelessWidget {
-  final List<PostData> posts;
 
-  PostList({@required this.posts});
+  PostList();
 
   @override
   Widget build(BuildContext context) {
-    if(posts == null){ return SizedBox.shrink(); }
     return ListView(
-      children: getChildren(),
+      children: getChildren(context),
     );
   }
 
-  List<Widget> getChildren() {
-    return posts.map((post) => PostTile(post: post)).toList();
+  List<Widget> getChildren(context) {
+    var posts = Provider.of<PostsCollection>(context, listen:false).posts;
+    //print(posts);
+    return posts.map(
+            (post) => PostTile(post)
+    ).toList();
   }
 }

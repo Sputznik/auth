@@ -7,78 +7,70 @@ import 'image_cover.dart';
 import 'image_picker_dialog.dart';
 import 'package:provider/provider.dart';
 import 'package:auth/models/posts_data.dart';
-import 'package:auth/helpers/wp.dart';
 
 class PostTile extends StatefulWidget {
+
   final PostData post;
 
-  PostTile({@required this.post});
+  PostTile(this.post);
 
   @override
-  _PostTileState createState() => _PostTileState(this.post);
+  _PostTileState createState() => _PostTileState();
 }
 
 class _PostTileState extends State<PostTile> {
-  PostData post;
 
-  bool isLoading = false;
-
-  _PostTileState(this.post);
+  _PostTileState();
 
   Widget build(BuildContext context) {
-    if (post != null) {
-      //print(post.featuredImage);
-      //post.featuredImage.upload();
-      return buildItem(context);
-    }
-    return SizedBox.shrink();
+    return buildItem(widget.post);
   }
 
-  Widget buildItem(context) {
-    return Card(
-      child: Column(
+  Widget buildItem(post) {
+    return Container(
+      height: 90,
+      margin: EdgeInsets.only(left: 10.0, right: 10.0, bottom: 10.0),
+      decoration: BoxDecoration(
+        border: Border.all(
+          color: Colors.black12,
+        ),
+        borderRadius: BorderRadius.circular(3.0),
+      ),
+      child: Row(
         children: <Widget>[
-          Row(
-            children: <Widget>[
-              ImageCoverWidget(
-                media: post.featuredImage,
-                width: 120,
-                height: 120,
-              ),
-              Container(
-                width: 195,
-                padding: EdgeInsets.all(10),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: <Widget>[
-                    buildPostTitle(context),
-                    SizedBox(height: 5.0),
-                    buildPostExcerpt(context),
-                    SizedBox(height: 20.0),
-                    buildPostDate(context),
-                  ],
-                ),
-              ),
-              isLoading ? buildLoader(context) : buildPostOptions(context),
-            ],
-          )
+          buildPostImage(post),
+          Container(
+            padding: EdgeInsets.all(10),
+            width: MediaQuery.of(context).size.width - (90 + 30 + 30),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                buildPostTitle(post),
+                SizedBox( height: 10,),
+                //buildPostExcerpt(context),
+                //SizedBox( height: 10,),
+                buildPostDate(post)
+              ],
+            ),  
+          ),
+          post.isLoading ? buildLoader(post) : buildPostOptions(post)
         ],
       ),
     );
   }
 
-  Widget buildLoader(context) {
+  Widget buildLoader(post) {
     return Container(
-        width: 20,
-        height: 20,
+        width: 30,
+        height: 30,
         child: CircularProgressIndicator(
           strokeWidth: 2.0,
           valueColor: AlwaysStoppedAnimation<Color>(Colors.black87),
         ));
   }
 
-  Widget buildPostOptions(context) {
+  Widget buildPostOptions(post) {
     return Container(
       padding: EdgeInsets.all(0),
       width: 30,
@@ -86,7 +78,15 @@ class _PostTileState extends State<PostTile> {
     );
   }
 
-  Widget buildPostTitle(context) {
+  Widget buildPostImage(post){
+    return ImageCoverWidget(
+      media: post.featuredImage,
+      width: 90,
+      height: 90,
+    );
+  }
+
+  Widget buildPostTitle(post) {
     return Text(
       post.getTitle().toUpperCase(),
       style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
@@ -94,16 +94,17 @@ class _PostTileState extends State<PostTile> {
       overflow: TextOverflow.ellipsis,
     );
   }
-
-  Widget buildPostExcerpt(context) {
+  /*
+  Widget buildPostExcerpt(post) {
     return Text(
-      post.getContent().toPlainText().replaceAll('\n', ' '),
+      widget.post.getContent().toPlainText().replaceAll('\n', ' '),
       maxLines: 2,
       overflow: TextOverflow.ellipsis,
     );
   }
+  */
 
-  Widget buildPostDate(context) {
+  Widget buildPostDate(post) {
     return Row(
       children: <Widget>[
         Text(
@@ -113,12 +114,12 @@ class _PostTileState extends State<PostTile> {
         SizedBox(
           width: 5.0,
         ),
-        buildPostStatus(context)
+        buildPostStatus(post)
       ],
     );
   }
 
-  Widget buildPostStatus(context) {
+  Widget buildPostStatus(post) {
     if (post.id > 0) {
       return Icon(
         Icons.check_circle,
@@ -132,96 +133,62 @@ class _PostTileState extends State<PostTile> {
     );
   }
 
-  void onSelectedOption(selectedItem) {
+  Future onSelectedOption(selectedItem) async{
     PostsCollection postsCollection =
         Provider.of<PostsCollection>(context, listen: false);
 
+    PostData post = widget.post; //Provider.of<PostData>(context, listen: false);
+
     switch (selectedItem) {
       case 'edit':
-        actionEdit(postsCollection);
+        bool toUpdate = await post.actionEdit(context);
+        if(toUpdate){
+          if(post.id > 0){ post.upload();}
+          postsCollection.write();
+        }
         break;
       case "set-featured":
-        actionFeaturedImage(postsCollection);
+        await post.actionFeaturedImage(context);
+        if(post.id > 0){ post.upload();}
+        postsCollection.write();
         break;
       case "delete":
-        actionDelete(postsCollection);
+        if(post.id > 0){ post.deleteFromServer();}
+        postsCollection.deleteItem(post);
         break;
       case "publish":
-        actionPublish(postsCollection);
+        await post.upload();
+        postsCollection.write();
         break;
     }
   }
 
-  void actionDelete(postsCollection) async {
-    setState(() {
-      isLoading = true;
-    });
 
-    await postsCollection.deleteItem(post);
-
-    setState(() {
-      post = null;
-    });
-  }
-
-  void actionFeaturedImage(postsCollection) async {
-    setState(() {
-      isLoading = true;
-    });
-
-    showDialog(
-      context: context,
-      builder: (BuildContext context) => ImagePickerDialog(),
-    ).then((newImage) {
-      if (newImage != null) {
-        setState(() {
-          post.featuredImage = post.createMediaAttachmentFromFile(newImage);
-          isLoading = false;
-        });
-        postsCollection.updateItem(post);
-      }
-    });
-  }
 
   /*
    * OPERATION TO SEND TO API AND GET IT PUBLISHED USING WP API
-   */
+   *
   void actionPublish(postsCollection) async {
     setState(() {
       isLoading = true;
     });
 
-    await postsCollection.publish(post);
+    try {
+      await postsCollection.publish(widget.post);
+    } catch (e) {
+      // Find the Scaffold in the widget tree and use it to show a SnackBar.
+      final snackBar = SnackBar(
+          content:
+              Text('Unexpected error has occurred. Please try again later!'));
+      Scaffold.of(context).showSnackBar(snackBar);
+    }
 
     setState(() {
       isLoading = false;
     });
   }
 
-  /*
-  * OPENS THE EDITOR
-  * WAITS FOR THE POP EVENT
-  * SAVES THE NEW POST RECEIVED & REBUILDS THE UI ONLY IF THE UPDATED POST HAS CHANGED
-  */
-  void actionEdit(postsCollection) async {
-    // TAKE A SNAPSHOT OF THE DATA AS STRING BEFORE IT IS SENT
-    String oldPostData = post.toString();
+   */
 
-    await Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => EditorPage(post),
-      ),
-    ).then((newPost) {
-      if (newPost.toString() != oldPostData) {
 
-        // REBUILD THE UI
-        setState(() {
-          post = newPost;
-        });
-
-        postsCollection.updateItem(post);
-      }
-    });
-  }
 }

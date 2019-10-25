@@ -1,4 +1,5 @@
 import 'package:auth/helpers/wp.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:zefyr/zefyr.dart';
 import 'package:timeago/timeago.dart' as timeago;
 import 'dart:io';
@@ -6,8 +7,11 @@ import '../helpers/html.dart';
 import 'package:path/path.dart';
 import 'base_data.dart';
 import 'media_data.dart';
+import '../widgets/image_picker_dialog.dart';
+import 'package:flutter/material.dart';
+import 'package:auth/editor_view.dart';
 
-class PostData extends BaseData {
+class PostData extends BaseData with ChangeNotifier{
 
   int id;
 
@@ -22,6 +26,8 @@ class PostData extends BaseData {
   MediaAttachment featuredImage;
 
   Map response;
+
+  bool isLoading = false;
 
   PostData(Map data) {
     this.id = data.containsKey('id') ? data['id'] : 0;
@@ -220,5 +226,65 @@ class PostData extends BaseData {
     }
     return null;
   }
+
+  Future actionFeaturedImage(context) async{
+    isLoading = true;
+    notifyListeners();
+
+    var newImage = await showDialog(
+      context: context,
+      builder: (BuildContext context) => ImagePickerDialog(),
+    );
+
+    if (newImage != null) {
+      isLoading = false;
+      featuredImage = createMediaAttachmentFromFile(newImage);
+    }
+    notifyListeners();
+  }
+
+  Future<bool> actionEdit(context) async{
+
+    // TAKE A SNAPSHOT OF THE DATA AS STRING BEFORE IT IS SENT TO THE EDITOR
+    String oldPostData = toString();
+
+    await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => EditorPage(this),
+      ),
+    );
+
+    if (toString() != oldPostData) return true;
+    return false;
+  }
+
+  Future<void> deleteFromServer() async{
+    if (id > 0) {
+      await Wordpress.getInstance().deletePost(id);
+    }
+  }
+
+  Future<void> upload() async{
+    // UPLOAD ALL THE MEDIA ATTACHMENTS INCLUDING THE FEATURED IMAGE
+    await uploadAttachments();
+
+    // GET THE JSON DATA THAT NEEDS TO BE SENT TO THE SERVER
+    final postData = getDataForUpload();
+
+    if (id > 0) { // NOT THE FIRST TIME
+      // SEND TO SERVER
+      await Wordpress.getInstance().updatePost(postData: postData, postId: id);
+    }
+    else{
+      // SEND TO SERVER FOR THE FIRST TIME
+      var response = await Wordpress.getInstance().createPost(postData: postData);
+      if(response.containsKey('id')){
+        response = response;
+        id = response['id'];
+      }
+    }
+  }
+
 }
 

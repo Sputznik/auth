@@ -8,8 +8,6 @@ import 'widgets/posts_list.dart';
 import 'package:provider/provider.dart';
 import 'models/posts_data.dart';
 
-import 'helpers/wp.dart';
-
 
 class PostsList extends StatefulWidget {
   @override
@@ -17,8 +15,6 @@ class PostsList extends StatefulWidget {
 }
 
 class _PostsState extends State<PostsList> {
-
-  List<PostData> posts;
 
   bool isLoading = false;
 
@@ -51,9 +47,13 @@ class _PostsState extends State<PostsList> {
         ),
         backgroundColor: Colors.red[900],
       ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
       body: Container(
-        padding: EdgeInsets.only(top: 10.0, left: 5.0, right: 0),
-        child: PostList(posts: posts)
+        padding: EdgeInsets.only(top: 10.0),
+        child: Selector<PostsCollection, int>(
+          selector: (_, postsCollection) => postsCollection.posts.length,
+          builder: (context, collection, child) => PostList(),
+        )
       ),
     );
   }
@@ -71,9 +71,9 @@ class _PostsState extends State<PostsList> {
 
     Navigator.push(
         context, MaterialPageRoute(builder: (context) => EditorPage(newPost)))
-        .then((newPost) {
+        .then((newPost) async{
       if (newPost.toString() != oldPostData) {
-        Provider.of<PostsCollection>(context, listen:false).addItem(newPost);
+        await Provider.of<PostsCollection>(context, listen:false).addItem(newPost);
       }
     });
   }
@@ -85,14 +85,11 @@ class _PostsState extends State<PostsList> {
       isLoading = true;
     });
 
-
-
     await Provider.of<PostsCollection>(context, listen:false).read();
 
-    // DISABLE THE LOADING STATE
     setState(() {
-      posts = Provider.of<PostsCollection>(context, listen:false).posts;
       isLoading = false;
     });
+
   }
 }
