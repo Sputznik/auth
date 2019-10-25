@@ -1,19 +1,9 @@
-
-import 'package:flutter/cupertino.dart';
+//import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-
-import 'models/post_data.dart';
-import './editor_view.dart';
-
-
 import 'models/posts_data.dart';
-
 import 'archives_view.dart';
-
 import 'package:provider/provider.dart';
-
 import "helpers/wp.dart";
-
 
 void main() {
 
@@ -38,7 +28,7 @@ class QuickStartApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
 
-    PostData post = PostData({});
+    //PostData post = PostData({});
 
     return MaterialApp(
       debugShowCheckedModeBanner: false,
@@ -52,12 +42,13 @@ class QuickStartApp extends StatelessWidget {
       initialRoute: '/',
       routes: {
         "/": (context) => PostsList(),
-        "/editor": (context) => EditorPage(post),
+        /*"/editor": (context) => EditorPage(post),*/
       },
     );
   }
 }
 
+/*
 class HomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -73,3 +64,4 @@ class HomePage extends StatelessWidget {
     );
   }
 }
+*/

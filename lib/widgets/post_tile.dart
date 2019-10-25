@@ -1,10 +1,8 @@
 import 'dart:ui';
-import 'package:auth/editor_view.dart';
 import 'package:flutter/material.dart';
 import '../models/post_data.dart';
 import 'post_options.dart';
 import 'image_cover.dart';
-import 'image_picker_dialog.dart';
 import 'package:provider/provider.dart';
 import 'package:auth/models/posts_data.dart';
 

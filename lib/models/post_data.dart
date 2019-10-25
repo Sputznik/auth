@@ -161,33 +161,6 @@ class PostData extends BaseData with ChangeNotifier{
     return data;
   }
 
-  /*
-  * 1. UPLOAD ALL ATTACHMENTS
-  * 2. UPLOAD THE POST
-  * 3. UPLOAD THE  POST META INFORMATION
-  *
-  void upload() async{
-    await uploadAttachments();
-
-    if(this.id == 0){
-      print('post upload');
-
-      final postData = getDataForUpload();
-
-      var response = await Wordpress.getInstance().createPost(postData: postData);
-      if(response.containsKey('id')){
-        this.response = response;
-        this.id = response['id'];
-        print(response);
-      }
-    }
-
-    //print(jsonObj);
-
-  }
-  */
-
-
   Map toJson() {
     Map jsonObj = {
       "id": this.id,

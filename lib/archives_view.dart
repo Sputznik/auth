@@ -1,9 +1,6 @@
 import 'dart:ui';
-import 'package:auth/editor_view.dart';
-import 'package:auth/widgets/post_tile.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-
 import 'models/post_data.dart';
 import 'widgets/posts_list.dart';
 import 'package:provider/provider.dart';

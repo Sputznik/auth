@@ -1,9 +1,7 @@
 import 'dart:collection';
-
 import 'package:auth/helpers/storage.dart';
 import 'package:flutter/material.dart';
 import 'package:auth/models/post_data.dart';
-import 'package:auth/helpers/wp.dart';
 
 class PostsCollection extends ChangeNotifier {
   List<PostData> _posts = [];
