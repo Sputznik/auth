@@ -10,9 +10,7 @@ import 'package:auth/models/posts_data.dart';
 
 class PostTile extends StatefulWidget {
 
-  final PostData post;
-
-  PostTile(this.post);
+  PostTile();
 
   @override
   _PostTileState createState() => _PostTileState();
@@ -23,7 +21,11 @@ class _PostTileState extends State<PostTile> {
   _PostTileState();
 
   Widget build(BuildContext context) {
-    return buildItem(widget.post);
+    return Consumer<PostData>(
+      builder: (_, post, child) => buildItem(post),
+    );
+
+    //return buildItem(widget.post);
   }
 
   Widget buildItem(post) {
@@ -137,7 +139,7 @@ class _PostTileState extends State<PostTile> {
     PostsCollection postsCollection =
         Provider.of<PostsCollection>(context, listen: false);
 
-    PostData post = widget.post; //Provider.of<PostData>(context, listen: false);
+    PostData post = Provider.of<PostData>(context, listen: false);
 
     switch (selectedItem) {
       case 'edit':

@@ -239,6 +239,7 @@ class PostData extends BaseData with ChangeNotifier{
     if (newImage != null) {
       isLoading = false;
       featuredImage = createMediaAttachmentFromFile(newImage);
+
     }
     notifyListeners();
   }

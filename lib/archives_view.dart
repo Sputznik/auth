@@ -1,5 +1,6 @@
 import 'dart:ui';
 import 'package:auth/editor_view.dart';
+import 'package:auth/widgets/post_tile.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
@@ -21,7 +22,8 @@ class _PostsState extends State<PostsList> {
   @override
   void initState() {
     super.initState();
-    this.getData();
+    Provider.of<PostsCollection>(context, listen:false).read();
+    //this.getData();
   }
 
   @override
@@ -76,20 +78,5 @@ class _PostsState extends State<PostsList> {
         await Provider.of<PostsCollection>(context, listen:false).addItem(newPost);
       }
     });
-  }
-
-  void getData() async {
-
-    // ENABLE THE LOADING STATE
-    setState(() {
-      isLoading = true;
-    });
-
-    await Provider.of<PostsCollection>(context, listen:false).read();
-
-    setState(() {
-      isLoading = false;
-    });
-
   }
 }

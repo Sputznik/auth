@@ -38,13 +38,6 @@ class EditorPageState extends State<EditorPage> {
     super.initState();
     _focusNode = FocusNode();
 
-    /*
-    // READ THE MEDIA CONTENTS TO INITIALIZE THE MEDIA STORAGE ELEMENTS
-    mediaStorage.read().then((_){
-
-    });
-    */
-
     setState(() {
       _controller = ZefyrController(widget.post.getContent());
       postTitle = createPostTitleWidget(widget.post.getTitle());

@@ -17,9 +17,11 @@ class PostList extends StatelessWidget {
 
   List<Widget> getChildren(context) {
     var posts = Provider.of<PostsCollection>(context, listen:false).posts;
-    //print(posts);
     return posts.map(
-            (post) => PostTile(post)
+            (post) => ChangeNotifierProvider<PostData>.value(
+              value: post,
+              child: PostTile()
+            )
     ).toList();
   }
 }
