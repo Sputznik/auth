@@ -28,7 +28,7 @@ class _PostsState extends State<PostsList> {
 
   @override
   Widget build(BuildContext context) {
-    //Wordpress.getInstance().test();
+
     return Scaffold(
       appBar: AppBar(
         title: Text('Notes'),
@@ -67,16 +67,9 @@ class _PostsState extends State<PostsList> {
   */
   void openEditor() async {
     PostData newPost = PostData({});
-
-    // OLD SNAPSHOT
-    String oldPostData = newPost.toString();
-
-    Navigator.push(
-        context, MaterialPageRoute(builder: (context) => EditorPage(newPost)))
-        .then((newPost) async{
-      if (newPost.toString() != oldPostData) {
-        await Provider.of<PostsCollection>(context, listen:false).addItem(newPost);
-      }
-    });
+    bool toUpdate = await newPost.actionEdit(context);
+    if(toUpdate){
+      await Provider.of<PostsCollection>(context, listen:false).addItem(newPost);
+    }
   }
 }

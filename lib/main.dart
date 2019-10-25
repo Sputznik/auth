@@ -22,8 +22,6 @@ void main() {
 
   //Wordpress.getInstance().initialize('http://192.168.43.253/wordpress/wp-json/');
 
-
-
   runApp(
     MultiProvider(
       providers: [
