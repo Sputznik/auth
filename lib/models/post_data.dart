@@ -8,6 +8,7 @@ import 'package:path/path.dart';
 import 'base_data.dart';
 import 'media_data.dart';
 import '../widgets/image_picker_dialog.dart';
+import '../widgets/rename_title_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:auth/editor_view.dart';
 
@@ -231,6 +232,20 @@ class PostData extends BaseData with ChangeNotifier{
 
     if (toString() != oldPostData) return true;
     return false;
+  }
+
+  Future<bool> actionRenameTitle(context) async{
+    // TAKE A SNAPSHOT OF THE DATA AS STRING BEFORE IT IS SENT TO THE EDITOR
+    String oldPostData = toString();
+
+    title = await showDialog(
+      context: context,
+      builder: (BuildContext context) => RenameTitleDialog(title),
+    );
+
+    if (toString() != oldPostData) return true;
+    return false;
+    //notifyListeners();
   }
 
   Future<void> deleteFromServer() async{

@@ -7,7 +7,6 @@ import 'package:provider/provider.dart';
 import 'package:auth/models/posts_data.dart';
 
 class PostTile extends StatefulWidget {
-
   PostTile();
 
   @override
@@ -15,7 +14,6 @@ class PostTile extends StatefulWidget {
 }
 
 class _PostTileState extends State<PostTile> {
-
   _PostTileState();
 
   Widget build(BuildContext context) {
@@ -47,12 +45,14 @@ class _PostTileState extends State<PostTile> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
                 buildPostTitle(post),
-                SizedBox( height: 10,),
+                SizedBox(
+                  height: 10,
+                ),
                 //buildPostExcerpt(context),
                 //SizedBox( height: 10,),
                 buildPostDate(post)
               ],
-            ),  
+            ),
           ),
           post.isLoading ? buildLoader(post) : buildPostOptions(post)
         ],
@@ -74,11 +74,11 @@ class _PostTileState extends State<PostTile> {
     return Container(
       padding: EdgeInsets.all(0),
       width: 30,
-      child: PostOptionsMenu(onSelectedOption, post),
+      child: PostOptionsMenu(post: post),
     );
   }
 
-  Widget buildPostImage(post){
+  Widget buildPostImage(post) {
     return ImageCoverWidget(
       media: post.featuredImage,
       width: 90,
@@ -94,6 +94,7 @@ class _PostTileState extends State<PostTile> {
       overflow: TextOverflow.ellipsis,
     );
   }
+
   /*
   Widget buildPostExcerpt(post) {
     return Text(
@@ -133,39 +134,7 @@ class _PostTileState extends State<PostTile> {
     );
   }
 
-  Future onSelectedOption(selectedItem) async{
-    PostsCollection postsCollection =
-        Provider.of<PostsCollection>(context, listen: false);
-
-    PostData post = Provider.of<PostData>(context, listen: false);
-
-    switch (selectedItem) {
-      case 'edit':
-        bool toUpdate = await post.actionEdit(context);
-        if(toUpdate){
-          if(post.id > 0){ post.upload();}
-          postsCollection.write();
-        }
-        break;
-      case "set-featured":
-        await post.actionFeaturedImage(context);
-        if(post.id > 0){ post.upload();}
-        postsCollection.write();
-        break;
-      case "delete":
-        if(post.id > 0){ post.deleteFromServer();}
-        postsCollection.deleteItem(post);
-        break;
-      case "publish":
-        await post.upload();
-        postsCollection.write();
-        break;
-    }
-  }
-
-
-
-  /*
+/*
    * OPERATION TO SEND TO API AND GET IT PUBLISHED USING WP API
    *
   void actionPublish(postsCollection) async {
@@ -189,6 +158,5 @@ class _PostTileState extends State<PostTile> {
   }
 
    */
-
 
 }
