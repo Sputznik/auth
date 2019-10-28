@@ -1,4 +1,5 @@
 //import 'package:flutter/cupertino.dart';
+import 'package:auth/login.dart';
 import 'package:flutter/material.dart';
 import 'models/posts_data.dart';
 import 'archives_view.dart';
@@ -6,7 +7,6 @@ import 'package:provider/provider.dart';
 import "helpers/wp.dart";
 
 void main() {
-
   // SET THE BASE URL FOR THE WORDPRESS API
   Wordpress.getInstance().initialize('https://churchbuzz.in/wp-json/');
 
@@ -27,21 +27,23 @@ void main() {
 class QuickStartApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-
     //PostData post = PostData({});
 
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
-          buttonTheme: ButtonThemeData(minWidth: 5,),
-          textTheme: TextTheme(button: TextStyle(fontSize: 12)),
-          primarySwatch: Colors.red,
-          brightness: Brightness.light
+        buttonTheme: ButtonThemeData(
+          minWidth: 5,
+        ),
+        textTheme: TextTheme(button: TextStyle(fontSize: 12)),
+        primarySwatch: Colors.red,
+        brightness: Brightness.light,
       ),
       title: 'Notes',
       initialRoute: '/',
       routes: {
-        "/": (context) => PostsList(),
+        "/": (context) => LoginPage(),
+        "/postList": (context) => PostsList(),
         /*"/editor": (context) => EditorPage(post),*/
       },
     );
