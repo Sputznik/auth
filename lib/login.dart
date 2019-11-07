@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'helpers/wp.dart';
 import 'package:flutter/material.dart';
 
@@ -90,13 +92,15 @@ class _LoginPageState extends State<LoginPage> {
                       Wordpress.getInstance().webLogin(_emailController.text, _passwordController.text)
                           .then((appPass) {
 
-                            //print(appPass);
-
                             if(appPass.containsKey('new_password') && appPass.containsKey('user')){
                               Wordpress.getInstance().saveAuthKeyToFile(_emailController.text, appPass['new_password'], appPass['user']);
                               _emailController.clear();
                               _passwordController.clear();
                               Navigator.pushReplacementNamed(context, 'posts');
+                            }
+
+                            else{
+                              showLoginError(appPass);
                             }
 
 
@@ -125,5 +129,13 @@ class _LoginPageState extends State<LoginPage> {
         ),
       ),
     );
+  }
+  showLoginError(response){
+    if(response['errors'].containsKey('invalid_username')){
+      print('Incorrect Username');
+    }
+    else if(response['errors'].containsKey('incorrect_password')){
+      print('Incorrect Password');
+    }
   }
 }
