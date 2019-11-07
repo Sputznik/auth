@@ -5,7 +5,7 @@ import 'models/post_data.dart';
 import 'widgets/posts_list.dart';
 import 'package:provider/provider.dart';
 import 'models/posts_data.dart';
-
+import 'user_details.dart';
 
 class PostsList extends StatefulWidget {
   @override
@@ -30,6 +30,16 @@ class _PostsState extends State<PostsList> {
       appBar: AppBar(
         title: Text('Notes'),
         backgroundColor: Colors.red[900],
+        actions: <Widget>[
+          IconButton(
+            onPressed: (){
+              Navigator.pushNamed(context, 'userInfo');
+            },
+            icon: Icon(
+              Icons.person
+            ),
+          )
+        ],
         leading: !isLoading
             ? null
             : (Container(

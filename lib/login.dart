@@ -1,7 +1,6 @@
-import 'dart:convert';
-import 'package:http/http.dart' as http;
+import 'helpers/wp.dart';
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+
 
 class LoginPage extends StatefulWidget {
   @override
@@ -13,12 +12,6 @@ class _LoginPageState extends State<LoginPage> {
   final _formKey = GlobalKey<FormState>();
   static final _emailController = TextEditingController();
   static final _passwordController = TextEditingController();
-
-  @override
-  void initState() {
-    super.initState();
-    _showPassword();
-  }
 
   final _emailField = TextFormField(
     validator: (value) {
@@ -32,7 +25,7 @@ class _LoginPageState extends State<LoginPage> {
     cursorColor: Colors.red,
     decoration: InputDecoration(
       contentPadding: EdgeInsets.fromLTRB(20.0, 12.0, 20.0, 12.0),
-      labelText: 'Email',
+      labelText: 'Email/Username',
       prefixIcon: Icon(Icons.person),
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(20.0),
@@ -94,12 +87,20 @@ class _LoginPageState extends State<LoginPage> {
                 RaisedButton(
                   onPressed: () {
                     if (_formKey.currentState.validate()) {
-                      _webLogin(_emailController.text, _passwordController.text)
+                      Wordpress.getInstance().webLogin(_emailController.text, _passwordController.text)
                           .then((appPass) {
-                            print(appPass);
-                        _savePassword(appPass);
+
+                            //print(appPass);
+
+                            if(appPass.containsKey('new_password') && appPass.containsKey('user')){
+                              Wordpress.getInstance().saveAuthKeyToFile(_emailController.text, appPass['new_password'], appPass['user']);
+                              _emailController.clear();
+                              _passwordController.clear();
+                              Navigator.pushReplacementNamed(context, 'posts');
+                            }
+
+
                       });
-//                      _webLogin(_emailController.text, _passwordController.text);
                     }
                   },
                   padding: EdgeInsets.fromLTRB(20.0, 12.0, 20.0, 12.0),
@@ -124,38 +125,5 @@ class _LoginPageState extends State<LoginPage> {
         ),
       ),
     );
-  }
-
-  _webLogin(String _username, String _password) async {
-    //Encode the username and password
-    _username = base64.encode(utf8.encode(_username));
-    _password = base64.encode(utf8.encode(_password));
-
-    //Redirect to the server for getting a random application password
-    String _loginUrl =
-        'https://churchbuzz.in/wp-admin/admin-ajax.php?action=auth_with_flutter';
-
-    final Map<String, dynamic> userInfo = {
-      'ukey': _username,
-      'pkey': _password
-    };
-
-    var $headers = {"Accept": "application/json"};
-    var response =
-        await http.post(_loginUrl, body: userInfo, headers: $headers);
-
-    return response.body;
-  }
-
-  //Stores the application password in shared preference
-  _savePassword(String data) async {
-    final preference = await SharedPreferences.getInstance();
-    preference.setString('user_pass', data);
-  }
-
-  //Retrive the application password
-  _showPassword() async {
-    final preference = await SharedPreferences.getInstance();
-    _output = preference.getString('user_pass');
   }
 }
