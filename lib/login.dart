@@ -3,126 +3,49 @@ import 'dart:convert';
 import 'helpers/wp.dart';
 import 'package:flutter/material.dart';
 
-
 class LoginPage extends StatefulWidget {
   @override
   _LoginPageState createState() => _LoginPageState();
 }
 
 class _LoginPageState extends State<LoginPage> {
-  String _output = '';
+  final _scaffoldKey = GlobalKey<ScaffoldState>();
   final _formKey = GlobalKey<FormState>();
+
+  bool loadingFlag = false;
+
   static final _emailController = TextEditingController();
   static final _passwordController = TextEditingController();
 
-  final _emailField = TextFormField(
-    validator: (value) {
-      if (value.isEmpty) {
-        return 'Username cannot be empty';
-      }
-      return null;
-    },
-    keyboardType: TextInputType.emailAddress,
-    controller: _emailController,
-    cursorColor: Colors.red,
-    decoration: InputDecoration(
-      contentPadding: EdgeInsets.fromLTRB(20.0, 12.0, 20.0, 12.0),
-      labelText: 'Email/Username',
-      prefixIcon: Icon(Icons.person),
-      border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(20.0),
-      ),
-    ),
-  );
+  TextFormField _emailField;
+  TextFormField _passwordField;
 
-  final _passwordField = TextFormField(
-    validator: (value) {
-      if (value.isEmpty) {
-        return 'Password cannot be empty';
-      }
-      return null;
-    },
-    keyboardType: TextInputType.text,
-    controller: _passwordController,
-    cursorColor: Colors.red,
-    obscureText: true,
-    decoration: InputDecoration(
-      contentPadding: EdgeInsets.fromLTRB(20.0, 12.0, 20.0, 12.0),
-      labelText: 'Password',
-      prefixIcon: Icon(Icons.remove_red_eye),
-      border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(20.0),
-      ),
-    ),
-  );
+  @override
+  void initState() {
+    super.initState();
+    _emailField = buildTextFormField('username');
+    _passwordField = buildTextFormField('password');
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      key: _scaffoldKey,
       body: SafeArea(
         child: Form(
           key: _formKey,
           child: Center(
             child: ListView(
               shrinkWrap: true,
-              padding: EdgeInsets.only(left: 10.0, right: 10.0),
+              padding: EdgeInsets.only(left: 20.0, right: 20.0),
               children: <Widget>[
-                Text(
-                  'Login'.toUpperCase(),
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                      fontSize: 28.0,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.grey[900]),
-                ),
-                SizedBox(
-                  height: 20.0,
-                ),
+                buildFormHeading(),
+                SizedBox(height: 20.0),
                 _emailField,
-                SizedBox(
-                  height: 10.0,
-                ),
+                SizedBox(height: 20.0),
                 _passwordField,
-                SizedBox(
-                  height: 20.0,
-                ),
-                RaisedButton(
-                  onPressed: () {
-                    if (_formKey.currentState.validate()) {
-                      Wordpress.getInstance().webLogin(_emailController.text, _passwordController.text)
-                          .then((appPass) {
-
-                            if(appPass.containsKey('new_password') && appPass.containsKey('user')){
-                              Wordpress.getInstance().saveAuthKeyToFile(_emailController.text, appPass['new_password'], appPass['user']);
-                              _emailController.clear();
-                              _passwordController.clear();
-                              Navigator.pushReplacementNamed(context, 'posts');
-                            }
-
-                            else{
-                              showLoginError(appPass);
-                            }
-
-
-                      });
-                    }
-                  },
-                  padding: EdgeInsets.fromLTRB(20.0, 12.0, 20.0, 12.0),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(20.0),
-                  ),
-                  child: Text(
-                    'Login'.toUpperCase(),
-                    style: TextStyle(
-                      color: Colors.white,
-                    ),
-                  ),
-                ),
-                Container(
-                  child: (_output) != null
-                      ? Text(_output)
-                      : Text('No password found!!!!'),
-                ),
+                SizedBox(height: 20.0),
+                buildFormButton(),
               ],
             ),
           ),
@@ -130,12 +53,148 @@ class _LoginPageState extends State<LoginPage> {
       ),
     );
   }
-  showLoginError(response){
-    if(response['errors'].containsKey('invalid_username')){
-      print('Incorrect Username');
+
+  Widget buildFormButton() {
+    return RaisedButton(
+      onPressed: () => loginBtnClick(),
+      padding: EdgeInsets.fromLTRB(20.0, 12.0, 20.0, 12.0),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(20.0),
+      ),
+      child: loadingFlag
+          ? loadingIcon()
+          : Text('Login', style: TextStyle(color: Colors.white, fontSize: 15.0)),
+    );
+  }
+
+  // ENABLED WHEN THE LOADING FLAG IS TRUE
+  Widget loadingIcon() {
+    return Container(
+        width: 20.0,
+        height: 20.0,
+        child: CircularProgressIndicator(
+          strokeWidth: 2.0,
+          valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+        ));
+  }
+
+  // GET THE SNACKBAR FOR ERROR
+  Widget snackbarError(response) {
+    Widget snackBar;
+    if (response['errors'].containsKey('invalid_username')) {
+      snackBar = SnackBar(content: Text('Invalid Username!'));
+    } else if (response['errors'].containsKey('incorrect_password')) {
+      snackBar = SnackBar(content: Text('Incorrect Password!'));
     }
-    else if(response['errors'].containsKey('incorrect_password')){
-      print('Incorrect Password');
+    return snackBar;
+  }
+
+  Widget buildTextFormField(type) {
+    String validateText = '';
+    String label = '';
+    TextInputType textInputType = TextInputType.text;
+    TextEditingController controller;
+    bool obscureTextFlag = false;
+    Icon icon = Icon(Icons.person);
+
+    switch (type) {
+      case 'password':
+        label = 'Password';
+        validateText = 'Password cannot be empty';
+        controller = _passwordController;
+        obscureTextFlag = true;
+        icon = Icon(Icons.label);
+        break;
+      case 'username':
+        label = 'Email/Username';
+        validateText = 'Username cannot be empty';
+        textInputType = TextInputType.emailAddress;
+        controller = _emailController;
+        break;
     }
+
+    return TextFormField(
+      validator: (value) {
+        if (value.isEmpty) {
+          return validateText;
+        }
+        return null;
+      },
+      keyboardType: textInputType,
+      controller: controller,
+      cursorColor: Colors.red,
+      obscureText: obscureTextFlag,
+      decoration: InputDecoration(
+        contentPadding: EdgeInsets.fromLTRB(20.0, 12.0, 20.0, 12.0),
+        labelText: label,
+        prefixIcon: icon,
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(20.0),
+        ),
+      ),
+    );
+  }
+
+  // ENABLE THE LOADER
+  showLoaderOnBtn() {
+    setState(() {
+      loadingFlag = true;
+    });
+  }
+
+  // DISABLE THE LOADER
+  hideLoaderBtn() {
+    setState(() {
+      loadingFlag = false;
+    });
+  }
+
+  loginBtnClick() async {
+    Wordpress wp = Wordpress.getInstance();
+    String username = _emailController.text;
+    String password = _passwordController.text;
+
+    if (_formKey.currentState.validate()) {
+      // SHOW LOADER
+      showLoaderOnBtn();
+
+      // GET THE APPLICATION PASSWORD FROM THE SERVER
+      Map appPass = await wp.webLogin(username, password);
+
+      // HIDE LOADER
+      hideLoaderBtn();
+
+      // SAVE THE NEWLY ACQUIRED AUTH KEY
+      await wp.saveAuthKeyToFile(appPass);
+
+      if (appPass.containsKey('errors')) {
+        // Show SnackBar if the username/password is not valid
+        _scaffoldKey.currentState.showSnackBar(snackbarError(appPass));
+      } else {
+        // RESET FORM
+        resetForm();
+
+        // REDIRECT TO THE NEXT SCREEN
+        Navigator.pushReplacementNamed(context, 'posts');
+      }
+    }
+  }
+
+  // CLEAR THE FORM
+  resetForm() {
+    _emailController.clear();
+    _passwordController.clear();
+  }
+
+  Widget buildFormHeading() {
+    return Text(
+      'Login'.toUpperCase(),
+      textAlign: TextAlign.center,
+      style: TextStyle(
+        fontSize: 28.0,
+        fontWeight: FontWeight.bold,
+        color: Colors.grey[900],
+      ),
+    );
   }
 }

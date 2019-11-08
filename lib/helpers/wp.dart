@@ -187,12 +187,26 @@ class Wordpress {
   }
 
   // Stores the application password in shared preference
-  saveAuthKeyToFile(String username, String userkey, Map user) async {
-    String authKey = base64Encode(utf8.encode(username + ":" + userkey));
-    final preference = await SharedPreferences.getInstance();
-    preference.setString('wp_auth_key', authKey);
-    preference.setString('wp_user', jsonEncode(user));
-    this.authKey = authKey;
+  saveAuthKeyToFile(Map appPass) async {
+
+    if (appPass.containsKey('new_password') && appPass.containsKey('user') && appPass['user'].containsKey('user_login')) {
+
+      // INIT VARIABLES
+      Map userInfo = appPass['user'];
+      String username = userInfo['user_login'];
+      String password = appPass['new_password'];
+      String authKey = base64Encode(utf8.encode(username + ":" + password));
+
+      // SAVING TO FILE
+      final preference = await SharedPreferences.getInstance();
+      preference.setString('wp_auth_key', authKey);
+      preference.setString('wp_user', jsonEncode(userInfo));
+
+      // REASSIGN THE OBJECT VARIABLE
+      this.authKey = authKey;
+    }
+
+
   }
 
   disposeAuthKeyFromFile() async{
