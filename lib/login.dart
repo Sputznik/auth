@@ -57,6 +57,7 @@ class _LoginPageState extends State<LoginPage> {
   Widget buildFormButton() {
     return RaisedButton(
       onPressed: () {
+        FocusScope.of(context).unfocus();
         loginBtnClick();
       },
       padding: EdgeInsets.fromLTRB(20.0, 12.0, 20.0, 12.0),
