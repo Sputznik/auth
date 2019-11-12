@@ -1,4 +1,5 @@
 //import 'package:flutter_wordpress/constants.dart';
+import 'package:flutter_wordpress/constants.dart';
 import 'package:http/http.dart' as http;
 import 'package:mime/mime.dart';
 import 'dart:convert';
@@ -9,12 +10,18 @@ import 'dart:typed_data';
 import 'package:flutter/services.dart';
 import 'dart:ui';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'wordpress/api.dart';
+import 'wordpress/models.dart';
 
 class Wordpress {
-  String baseUrl;
+  //String baseUrl;
 
   //String appUserName = '';
-  String authKey = '';
+  //String authKey = '';
+
+  WordpressUser user;
+
+  WordpressAPI api;
 
   //This creates the single instance by calling the `_internal` constructor specified below
   static final Wordpress _singleton = new Wordpress._internal();
@@ -25,73 +32,23 @@ class Wordpress {
   static Wordpress getInstance() => _singleton;
 
   void initialize(String baseUrl) {
-    this.baseUrl = baseUrl;
+    //this.baseUrl = baseUrl;
+    this.api = WordpressAPI(baseUrl);
   }
 
-  // TAKES THE HTTP RESPONSE AND RETURNS A JSON STRUCTURED LIST
-  parseResponse(http.Response response) {
-    var jsonList;
-    if (response.statusCode >= 200 && response.statusCode < 300) {
-      jsonList = json.decode(response.body);
-    }
-    return jsonList;
-  }
+  String getPostsUrl() => "wp-json/wp/v2/posts";
 
-  getResponse(endPoint) async {
-    String url = baseUrl + endPoint;
-    final response = await http.get(url, headers: getUrlHeaders());
-    return parseResponse(response);
-  }
+  String getMediaUrl() => "wp-json/wp/v2/media";
 
-  postResponse(endPoint, body, headers) async {
-    String url = baseUrl + endPoint;
-    final response = await http.post(url, body: body, headers: headers);
-    return parseResponse(response);
-  }
+  String getAuthUrl() => "wp-admin/admin-ajax.php?action=auth_with_flutter";
 
-  deleteResponse(endPoint) async {
-    String url = baseUrl + endPoint;
-    final response = await http.delete(url, headers: getUrlHeaders());
-    return parseResponse(response);
-  }
-
-  String getPostsUrl() {
-    return "wp-json/wp/v2/posts";
-  }
-
-  String getMediaUrl() {
-    return "wp-json/wp/v2/media";
-  }
-
-  String getAuthUrl() {
-    return "wp-admin/admin-ajax.php?action=auth_with_flutter";
-  }
-
-  String getMeUrl() {
-    return "wp-json/wp/v2/users/me";
-  }
-
-  /*
-  String getBase64(){
-    String username = appUserName;
-    String userkey = appUserKey;
-    return base64Encode(utf8.encode(username + ":" + userkey));
-  }
-  */
-
-  Map<String, String> getUrlHeaders() {
-    String base64 = authKey;
-    return {
-      'Accept': 'application/json',
-      'Authorization': 'Basic $base64',
-    };
-  }
+  String getMeUrl() => "wp-json/wp/v2/users/me";
 
   createPost({@required postData, endPoint}) async {
     if (endPoint == null) {
       endPoint = getPostsUrl();
     }
-    return await postResponse(endPoint, postData, getUrlHeaders());
+    return await api.postResponse(endPoint: endPoint, body: postData, base64: user.authKey);
   }
 
   updatePost({@required postData, @required int postId, endPoint}) async {
@@ -99,30 +56,19 @@ class Wordpress {
       endPoint = getPostsUrl();
     }
     endPoint += "/" + postId.toString();
-    return await postResponse(endPoint, postData, getUrlHeaders());
+    return await api.postResponse(endPoint: endPoint, body: postData, base64: user.authKey);
   }
 
   deletePost(int postId) async {
     String endPoint = getPostsUrl() + "/" + postId.toString();
-    return await deleteResponse(endPoint);
-  }
-
-  Future<ByteData> toByteData(
-      {@required file,
-      ImageByteFormat format = ImageByteFormat.rawRgba}) async {
-    ByteData data;
-    if (await file.exists()) {
-      Uint8List encoded = await file.readAsBytes();
-      data = encoded?.buffer?.asByteData();
-    }
-    return data;
+    return await api.deleteResponse(endPoint, user.authKey);
   }
 
   createMedia(File file) async {
-    String url = baseUrl + getMediaUrl();
+    String url = api.baseUrl + getMediaUrl();
     String filename = basename(file.path);
     var bytes = file.readAsBytesSync();
-    String base64 = this.authKey;
+    String base64 = this.user.authKey;
 
     final mimeTypeData = lookupMimeType(file.path, headerBytes: bytes);
 
@@ -132,50 +78,18 @@ class Wordpress {
       'Content-type': '$mimeTypeData'
     };
 
-    return await postResponse(getMediaUrl(), file.readAsBytesSync(), headers);
-
-    /*
-    http.post(url, body: file.readAsBytesSync(), headers: headers).then((res) {
-      print(res.body);
-    }).catchError((err) {
-      print(err);
-    });
-
-     */
+    return await api.postResponse( endPoint:getMediaUrl(), body:file.readAsBytesSync(), headers:headers);
   }
 
   Future<List> getPosts({endPoint}) async {
     if (endPoint == null) {
       endPoint = getPostsUrl();
     }
-    List posts = await getResponse(endPoint);
+    List posts = await api.getResponse(endPoint, user.authKey);
     return posts;
   }
 
-  void test() async {
-    /*
-    File file = File('/storage/emulated/0/Android/data/com.example.auth/files/Pictures/scaled_images.png');
-    var response = await createMedia(file);
-    print(response);
 
-
-     */
-
-    //print('test');
-
-    //List posts = await getPosts();
-    //print(posts);
-
-    /*
-    Map<String, dynamic> postData = {
-      'title': 'Sample Post',
-      'content': 'Sample Content',
-      'status': 'draft'
-    };
-    var newPost = await createPost(postData: postData);
-    print(newPost);
-    */
-  }
 
   webLogin(String _username, String _password) async {
     final Map<String, dynamic> userInfo = {
@@ -183,7 +97,7 @@ class Wordpress {
       'pkey': base64.encode(utf8.encode(_password))
     };
     var $headers = {"Accept": "application/json"};
-    return await postResponse(getAuthUrl(), userInfo, $headers);
+    return await api.postResponse( endPoint: getAuthUrl(), body: userInfo, headers: $headers);
   }
 
   // Stores the application password in shared preference
@@ -197,47 +111,64 @@ class Wordpress {
       String password = appPass['new_password'];
       String authKey = base64Encode(utf8.encode(username + ":" + password));
 
-      // SAVING TO FILE
-      final preference = await SharedPreferences.getInstance();
-      preference.setString('wp_auth_key', authKey);
-      preference.setString('wp_user', jsonEncode(userInfo));
+      print(userInfo);
 
-      // REASSIGN THE OBJECT VARIABLE
-      this.authKey = authKey;
+      // FETCH USER DETAILS FROM THE SERVER & SAVING TO FILE
+      await setUserFromServer(authKey);
+
+
     }
-
-
   }
 
   disposeAuthKeyFromFile() async{
     final preference = await SharedPreferences.getInstance();
-    preference.remove('wp_auth_key');
     preference.remove('wp_user');
   }
 
-  // Retrieve the application password
-  getAuthKeyFromFile() async {
+  // SET WORDPRESS USER FROM LOCAL FILE
+  setUserFromFile() async {
     final preference = await SharedPreferences.getInstance();
-    return preference.getString('wp_auth_key');
+    String userdata = preference.getString('wp_user');
+    if(userdata != null){
+      Map data = jsonDecode(userdata);
+      this.user = WordpressUser(data);
+    }
+  }
+
+  // SET WORDPRESS USER FROM SERVER
+  setUserFromServer(authKey) async{
+    Map serverUser = await api.getResponse(getMeUrl(), authKey);
+    serverUser['authKey'] = authKey;
+    this.user = WordpressUser(serverUser);
+
+    // SAVING TO FILE
+    final preference = await SharedPreferences.getInstance();
+    preference.setString('wp_user', jsonEncode(this.user.toJson()));
   }
 
   // IN CASE THE INTERNET IS NOT THERE BUT THE AUTHKEY IS PRESENT THEN ALLOW THE USER TO BE AUTHENTICATED FOR THE TIME BEING
   Future<bool> hasValidAuthKey() async {
-    this.authKey = await getAuthKeyFromFile();
 
-    if (this.authKey != null) {
+    print('checking for valid auth key');
+
+    await setUserFromFile();
+
+    print(this.user);
+
+    if (this.user != null && this.user.authKey != null) {
 
       try{
-        var user = await getResponse(getMeUrl());
-        if(user.containsKey('id') && user['id'] > 0){
-          return true;
-        }
+        setUserFromServer(this.user.authKey);
+
+        if(this.user.isValidUser()) return true;
+
       } on Exception catch(e){
-        if(this.authKey != null ){
-           return true;
-         }
+
+        return true;
+
       }
     }
     return false;
   }
 }
+
