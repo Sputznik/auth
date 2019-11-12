@@ -56,7 +56,9 @@ class _LoginPageState extends State<LoginPage> {
 
   Widget buildFormButton() {
     return RaisedButton(
-      onPressed: () => loginBtnClick(),
+      onPressed: () {
+        loginBtnClick();
+      },
       padding: EdgeInsets.fromLTRB(20.0, 12.0, 20.0, 12.0),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(20.0),
