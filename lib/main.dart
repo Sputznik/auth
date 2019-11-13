@@ -45,6 +45,9 @@ class _QuickStartAppState extends State<QuickStartApp> {
   _autoLogin() async {
     bool flag = await Wordpress.getInstance().hasValidAuthKey();
 
+    // JUST TO SHOW THE LOADER FOR AUTO LOGIN
+    await Future.delayed(Duration(seconds: 3));
+
     setState(() {
       _isLoggedIn = flag;
     });
@@ -65,7 +68,7 @@ class _QuickStartAppState extends State<QuickStartApp> {
       title: 'Notes',
 //      initialRoute: _appRoute,
       routes: {
-        "login": (BuildContext context) => LoginPage(),
+        "login": (BuildContext context) => LoginPage(autologin: false,),
         "posts": (BuildContext context) => PostsList(),
         "userInfo": (BuildContext context) => UserDetails(),
         /*"/editor": (context) => EditorPage(post),*/
@@ -76,23 +79,7 @@ class _QuickStartAppState extends State<QuickStartApp> {
   }
 
   buildHome(){
-    if(_isLoggedIn != null) return (_isLoggedIn) ? PostsList() : LoginPage();
-    return LoadingPage();
-  }
-}
-
-class LoadingPage extends StatelessWidget{
-
-  @override
-  Widget build(BuildContext context){
-    return SafeArea(
-      child: Scaffold(
-        body: Center(
-          child: Container(
-            child: CircularProgressIndicator(),
-          ),
-        ),
-      ),
-    );
+    if(_isLoggedIn != null) return (_isLoggedIn) ? PostsList() : LoginPage(autologin: false,);
+    return LoginPage(autologin: true);
   }
 }

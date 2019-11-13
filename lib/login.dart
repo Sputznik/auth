@@ -4,6 +4,11 @@ import 'helpers/wp.dart';
 import 'package:flutter/material.dart';
 
 class LoginPage extends StatefulWidget {
+
+  final bool autologin;
+
+  LoginPage({@required this.autologin});
+
   @override
   _LoginPageState createState() => _LoginPageState();
 }
@@ -29,26 +34,53 @@ class _LoginPageState extends State<LoginPage> {
 
   @override
   Widget build(BuildContext context) {
+
+    print(widget.autologin);
+
     return Scaffold(
       key: _scaffoldKey,
       body: SafeArea(
-        child: Form(
-          key: _formKey,
-          child: Center(
-            child: ListView(
-              shrinkWrap: true,
-              padding: EdgeInsets.only(left: 20.0, right: 20.0),
-              children: <Widget>[
-                buildFormHeading(),
-                SizedBox(height: 20.0),
-                _emailField,
-                SizedBox(height: 20.0),
-                _passwordField,
-                SizedBox(height: 20.0),
-                buildFormButton(),
-              ],
-            ),
+        child: (widget.autologin) ? buildAutoLoginWidget() : buildForm(),
+      ),
+    );
+  }
+
+  Widget buildAutoLoginWidget(){
+    return Stack(
+      children: <Widget>[
+        Opacity(
+            opacity: 0.5,
+            child: buildForm()
+        ),
+        Container(
+          alignment: Alignment.center,
+          decoration: BoxDecoration(
+            border: Border.all(color: Colors.black),
           ),
+          width: MediaQuery.of(context).size.width,
+          height: MediaQuery.of(context).size.height,
+          child: CircularProgressIndicator(),
+        ),
+      ],
+    );
+  }
+
+  Widget buildForm(){
+    return Form(
+      key: _formKey,
+      child: Center(
+        child: ListView(
+          shrinkWrap: true,
+          padding: EdgeInsets.only(left: 20.0, right: 20.0),
+          children: <Widget>[
+            buildFormHeading(),
+            SizedBox(height: 20.0),
+            _emailField,
+            SizedBox(height: 20.0),
+            _passwordField,
+            SizedBox(height: 20.0),
+            buildFormButton(),
+          ],
         ),
       ),
     );
