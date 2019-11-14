@@ -12,8 +12,7 @@ import '../widgets/rename_title_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:auth/editor_view.dart';
 
-class PostData extends BaseData with ChangeNotifier{
-
+class PostData extends BaseData with ChangeNotifier {
   int id;
 
   String title;
@@ -43,13 +42,13 @@ class PostData extends BaseData with ChangeNotifier{
 
     this.attachments = [];
     if (data.containsKey('attachments') && data['attachments'] != null) {
-      for(int i=0; i<data['attachments'].length; i++){
+      for (int i = 0; i < data['attachments'].length; i++) {
         attachments.add(MediaAttachment(data['attachments'][i]));
       }
     }
 
     // SET TITLE OF THE POST
-    data['title'] = data.containsKey('title') ? data['title'] : "Untitled";
+    data['title'] = data.containsKey('title') ? data['title'] : "";
     setTitle(data['title']);
 
     // SET CONTENT OF THE POST
@@ -63,10 +62,9 @@ class PostData extends BaseData with ChangeNotifier{
       ]);
     }
 
-    if(data.containsKey('response')){
+    if (data.containsKey('response')) {
       this.response = data['response'];
     }
-
   }
 
   void setTitle(String title) => this.title = title;
@@ -91,17 +89,17 @@ class PostData extends BaseData with ChangeNotifier{
   }
 
   // GETS THE ATTACHMENTS THAT ARE ACTUALLY EMBEDDED INSIDE THE DOCUMENT
-  List<MediaAttachment> getInlineAttachments(){
+  List<MediaAttachment> getInlineAttachments() {
     List<MediaAttachment> inlineAttachments = [];
 
     List<HtmlTag> tags = getHtmlJson();
     for (int i = 0; i < tags.length; i++) {
       if (tags[i].tag == 'img' && tags[i].attributes.containsKey('src')) {
-        String mediaId  = tags[i].attributes['src'];
+        String mediaId = tags[i].attributes['src'];
         int index = int.parse(mediaId);
 
         MediaAttachment temp = getEachAttachment(index);
-        if(temp != null){
+        if (temp != null) {
           inlineAttachments.add(temp);
         }
       }
@@ -118,19 +116,17 @@ class PostData extends BaseData with ChangeNotifier{
   }
 
   // REPLACE IMAGE TAG SOURCES WITH NETWORK URLS, SHOULD BE CALLED ONLY AFTER THE MEDIA ATTACHMENTS ARE UPDATED
-  List<HtmlTag> prepareHtmlTagsForUpload(){
-
+  List<HtmlTag> prepareHtmlTagsForUpload() {
     List<HtmlTag> tags = getHtmlJson();
     for (int i = 0; i < tags.length; i++) {
       if (tags[i].tag == 'img' && tags[i].attributes.containsKey('src')) {
-        String mediaId  = tags[i].attributes['src'];
+        String mediaId = tags[i].attributes['src'];
         int index = int.parse(mediaId);
 
         MediaAttachment temp = getEachAttachment(index);
-        if(temp != null && temp.networkUrl != null){
+        if (temp != null && temp.networkUrl != null) {
           tags[i].attributes['src'] = temp.networkUrl;
-        }
-        else{
+        } else {
           // IF OBJECT IF EMPTY/NULL THEN BETTER REMOVE THAT FROM THE TREE
           tags.removeAt(i);
         }
@@ -143,19 +139,16 @@ class PostData extends BaseData with ChangeNotifier{
   /*
    * MAKE SURE THIS FUNCTION IS CALLED AFTER THE INLINE ATTACHMENTS ARE UPLOADED
    *  */
-  getDataForUpload(){
-
+  getDataForUpload() {
     HtmlHelper html = HtmlHelper();
     List<HtmlTag> tags = prepareHtmlTagsForUpload();
     String textHtml = html.convertListToHtml(tags);
 
-    Map data = {
-      'title': title,
-      'content': textHtml,
-      'status': 'draft'
-    };
+    Map data = {'title': title, 'content': textHtml, 'status': 'draft'};
 
-    if(featuredImage != null && featuredImage.id != null && featuredImage.id > 0){
+    if (featuredImage != null &&
+        featuredImage.id != null &&
+        featuredImage.id > 0) {
       data['featured_media'] = featuredImage.id.toString();
     }
 
@@ -182,26 +175,24 @@ class PostData extends BaseData with ChangeNotifier{
     return jsonObj;
   }
 
-  MediaAttachment createMediaAttachmentFromFile(File file){
-    return MediaAttachment({
-      'fileName' : basename(file.path),
-      'localFile' : file.path
-    });
+  MediaAttachment createMediaAttachmentFromFile(File file) {
+    return MediaAttachment(
+        {'fileName': basename(file.path), 'localFile': file.path});
   }
 
-  int addAttachment(MediaAttachment media){
+  int addAttachment(MediaAttachment media) {
     attachments.add(media);
     return attachments.indexOf(media);
   }
 
-  MediaAttachment getEachAttachment(int index){
-    if (index < attachments.length){
+  MediaAttachment getEachAttachment(int index) {
+    if (index < attachments.length) {
       return attachments[index];
     }
     return null;
   }
 
-  Future actionFeaturedImage(context) async{
+  Future actionFeaturedImage(context) async {
     isLoading = true;
     notifyListeners();
 
@@ -213,13 +204,11 @@ class PostData extends BaseData with ChangeNotifier{
     if (newImage != null) {
       isLoading = false;
       featuredImage = createMediaAttachmentFromFile(newImage);
-
     }
     notifyListeners();
   }
 
-  Future<bool> actionEdit(context) async{
-
+  Future<bool> actionEdit(context) async {
     // TAKE A SNAPSHOT OF THE DATA AS STRING BEFORE IT IS SENT TO THE EDITOR
     String oldPostData = toString();
 
@@ -234,7 +223,7 @@ class PostData extends BaseData with ChangeNotifier{
     return false;
   }
 
-  Future<bool> actionRenameTitle(context) async{
+  Future<bool> actionRenameTitle(context) async {
     // TAKE A SNAPSHOT OF THE DATA AS STRING BEFORE IT IS SENT TO THE EDITOR
     String oldPostData = toString();
 
@@ -243,37 +232,37 @@ class PostData extends BaseData with ChangeNotifier{
       builder: (BuildContext context) => RenameTitleDialog(title),
     );
 
-    if (toString() != oldPostData) return true;
+    if (title != null && toString() != oldPostData) {
+      return true;
+    }
     return false;
-    //notifyListeners();
   }
 
-  Future<void> deleteFromServer() async{
+  Future<void> deleteFromServer() async {
     if (id > 0) {
       await Wordpress.getInstance().deletePost(id);
     }
   }
 
-  Future<void> upload() async{
+  Future<void> upload() async {
     // UPLOAD ALL THE MEDIA ATTACHMENTS INCLUDING THE FEATURED IMAGE
     await uploadAttachments();
 
     // GET THE JSON DATA THAT NEEDS TO BE SENT TO THE SERVER
     final postData = getDataForUpload();
 
-    if (id > 0) { // NOT THE FIRST TIME
+    if (id > 0) {
+      // NOT THE FIRST TIME
       // SEND TO SERVER
       await Wordpress.getInstance().updatePost(postData: postData, postId: id);
-    }
-    else{
+    } else {
       // SEND TO SERVER FOR THE FIRST TIME
-      var response = await Wordpress.getInstance().createPost(postData: postData);
-      if(response.containsKey('id')){
+      var response =
+          await Wordpress.getInstance().createPost(postData: postData);
+      if (response.containsKey('id')) {
         response = response;
         id = response['id'];
       }
     }
   }
-
 }
-

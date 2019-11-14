@@ -64,9 +64,17 @@ class _PostsState extends State<PostsList> {
   */
   void openEditor() async {
     PostData newPost = PostData({});
-    bool toUpdate = await newPost.actionEdit(context);
+    PostsCollection postsCollection = Provider.of<PostsCollection>(context, listen:false);
+
+    bool toUpdate = await newPost.actionRenameTitle(context);
+
     if(toUpdate){
-      await Provider.of<PostsCollection>(context, listen:false).addItem(newPost);
+      postsCollection.addItem(newPost);
+      toUpdate = await newPost.actionEdit(context);
+      if(toUpdate){
+        await postsCollection.write();
+        //await Provider.of<PostsCollection>(context, listen:false).addItem(newPost);
+      }
     }
   }
 }
