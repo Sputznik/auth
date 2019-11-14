@@ -54,9 +54,6 @@ class _LoginPageState extends State<LoginPage> {
         ),
         Container(
           alignment: Alignment.center,
-          decoration: BoxDecoration(
-            border: Border.all(color: Colors.black),
-          ),
           width: MediaQuery.of(context).size.width,
           height: MediaQuery.of(context).size.height,
           child: CircularProgressIndicator(),
