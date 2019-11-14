@@ -267,10 +267,11 @@ class PostData extends BaseData with ChangeNotifier {
     final postData = getDataForUpload();
 
     if (id > 0) {
-      // NOT THE FIRST TIME
-      // SEND TO SERVER
+
+      // NOT THE FIRST TIME WHILE SEND TO SERVER
       await Wordpress.getInstance().updatePost(postData: postData, postId: id);
     } else {
+
       // SEND TO SERVER FOR THE FIRST TIME
       var response =
           await Wordpress.getInstance().createPost(postData: postData);

@@ -28,6 +28,7 @@ class _LoginPageState extends State<LoginPage> {
   @override
   void initState() {
     super.initState();
+    loadingFlag = widget.autologin;
     _emailField = buildTextFormField('username');
     _passwordField = buildTextFormField('password');
   }
@@ -40,7 +41,7 @@ class _LoginPageState extends State<LoginPage> {
     return Scaffold(
       key: _scaffoldKey,
       body: SafeArea(
-        child: (widget.autologin) ? buildAutoLoginWidget() : buildForm(),
+        child: loadingFlag ? buildAutoLoginWidget() : buildForm(),
       ),
     );
   }
