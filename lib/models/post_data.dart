@@ -192,9 +192,8 @@ class PostData extends BaseData with ChangeNotifier {
     return null;
   }
 
-  Future actionFeaturedImage(context) async {
-    isLoading = true;
-    notifyListeners();
+  Future actionFeaturedImage(context) async{
+    showLoader();
 
     var newImage = await showDialog(
       context: context,
@@ -202,9 +201,19 @@ class PostData extends BaseData with ChangeNotifier {
     );
 
     if (newImage != null) {
-      isLoading = false;
       featuredImage = createMediaAttachmentFromFile(newImage);
     }
+
+    hideLoader();
+  }
+
+  void showLoader(){
+    isLoading = true;
+    notifyListeners();
+  }
+
+  void hideLoader(){
+    isLoading = false;
     notifyListeners();
   }
 
@@ -232,9 +241,12 @@ class PostData extends BaseData with ChangeNotifier {
       builder: (BuildContext context) => RenameTitleDialog(title),
     );
 
-    if (title != null && toString() != oldPostData) {
-      return true;
+    if (title != null){
+      this.title = title;
+      notifyListeners();
+      if (toString() != oldPostData) return true;
     }
+
     return false;
   }
 
@@ -244,7 +256,10 @@ class PostData extends BaseData with ChangeNotifier {
     }
   }
 
-  Future<void> upload() async {
+  Future<void> upload() async{
+
+    showLoader();
+
     // UPLOAD ALL THE MEDIA ATTACHMENTS INCLUDING THE FEATURED IMAGE
     await uploadAttachments();
 
@@ -264,5 +279,7 @@ class PostData extends BaseData with ChangeNotifier {
         id = response['id'];
       }
     }
+
+    hideLoader();
   }
 }
