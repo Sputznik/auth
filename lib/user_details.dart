@@ -1,8 +1,6 @@
-import 'dart:convert';
-
 import 'package:auth/helpers/wp.dart';
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 class UserDetails extends StatefulWidget {
   @override
@@ -36,15 +34,13 @@ class _UserDetailsState extends State<UserDetails> {
         child: Column(
           children: <Widget>[
             SizedBox(height: 40.0),
-            Container(
-              width: 100.0,
-              height: 100.0,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                image: DecorationImage(
-                  fit: BoxFit.fill,
-                  image: NetworkImage(_avatar),
-                ),
+            ClipOval(
+              child: CachedNetworkImage(
+                imageUrl: _avatar,
+                placeholder: (context, url) => new CircularProgressIndicator(),
+                errorWidget: (context, url, error) => new Icon(Icons.error),
+                width: 80.0,
+                  height: 80.0,
               ),
             ),
             SizedBox(height: 40.0),

@@ -33,7 +33,7 @@ dependencies:
   connectivity:
   mime:
   shared_preferences:
-
+  cached_network_image:
 
 
 
