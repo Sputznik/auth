@@ -153,7 +153,8 @@ class Wordpress {
 
     await setUserFromFile();
 
-    print(this.user);
+    //print('User details below');
+    //print(this.user);
 
     if (this.user != null && this.user.authKey != null) {
 

@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'helpers/wp.dart';
 import 'package:flutter/material.dart';
 
+
 class LoginPage extends StatefulWidget {
 
   final bool autologin;
@@ -28,7 +29,6 @@ class _LoginPageState extends State<LoginPage> {
   @override
   void initState() {
     super.initState();
-    loadingFlag = widget.autologin;
     _emailField = buildTextFormField('username');
     _passwordField = buildTextFormField('password');
   }
@@ -36,12 +36,13 @@ class _LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
 
-    print(widget.autologin);
+    //print('widget.autologin');
+    //print(widget.autologin);
 
     return Scaffold(
       key: _scaffoldKey,
       body: SafeArea(
-        child: loadingFlag ? buildAutoLoginWidget() : buildForm(),
+        child: widget.autologin ? buildAutoLoginWidget() : buildForm(),
       ),
     );
   }
@@ -94,9 +95,7 @@ class _LoginPageState extends State<LoginPage> {
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(20.0),
       ),
-      child: loadingFlag
-          ? loadingIcon()
-          : Text('Login', style: TextStyle(color: Colors.white, fontSize: 15.0)),
+      child: loadingFlag ? loadingIcon() : Text('Login', style: TextStyle(color: Colors.white, fontSize: 15.0)),
     );
   }
 

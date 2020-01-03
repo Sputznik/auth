@@ -9,9 +9,9 @@ import "helpers/wp.dart";
 void main() {
 
   // SET THE BASE URL FOR THE WORDPRESS API
-  Wordpress.getInstance().initialize('https://churchbuzz.in/wp-json/');
+  //Wordpress.getInstance().initialize('https://churchbuzz.in/wp-json/');
 
-  //Wordpress.getInstance().initialize('http://192.168.43.225/wordpress/');
+  Wordpress.getInstance().initialize('http://192.168.43.225/wordpress/');
 
 
   runApp(
@@ -43,7 +43,11 @@ class _QuickStartAppState extends State<QuickStartApp> {
   }
 
   _autoLogin() async {
+
     bool flag = await Wordpress.getInstance().hasValidAuthKey();
+
+    //print('Flag below');
+    //print(flag);
 
     // JUST TO SHOW THE LOADER FOR AUTO LOGIN
     await Future.delayed(Duration(seconds: 3));
@@ -71,12 +75,13 @@ class _QuickStartAppState extends State<QuickStartApp> {
         "login": (BuildContext context) => LoginPage(autologin: false,),
         "posts": (BuildContext context) => PostsList(),
         "userInfo": (BuildContext context) => UserDetails(),
-        /*"/editor": (context) => EditorPage(post),*/
       },
       home: buildHome(),
 //        home: homepage,
     );
   }
+
+//  buildHome() => PostsList();
 
   buildHome(){
     if(_isLoggedIn != null) return (_isLoggedIn) ? PostsList() : LoginPage(autologin: false,);

@@ -16,7 +16,7 @@ class ImagePickerDialog extends StatelessWidget {
         ),
       ],
       content: Container(
-        height: 80.0,
+        height: 100.0,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
