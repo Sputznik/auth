@@ -192,6 +192,7 @@ class _LoginPageState extends State<LoginPage> {
 
       // GET THE APPLICATION PASSWORD FROM THE SERVER
       Map appPass = await wp.webLogin(username, password);
+      print( 'App details:'); print(appPass);
 
       // HIDE LOADER
       hideLoaderBtn();

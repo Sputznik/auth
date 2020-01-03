@@ -10,8 +10,8 @@ void main() {
 
   // SET THE BASE URL FOR THE WORDPRESS API
   //Wordpress.getInstance().initialize('https://churchbuzz.in/wp-json/');
-
-  Wordpress.getInstance().initialize('http://192.168.43.225/wordpress/');
+  Wordpress.getInstance().initialize('https://www.ykasandbox.com/');
+  //Wordpress.getInstance().initialize('http://192.168.43.225/wordpress/');
 
 
   runApp(

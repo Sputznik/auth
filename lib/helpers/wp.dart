@@ -97,13 +97,17 @@ class Wordpress {
       'pkey': base64.encode(utf8.encode(_password))
     };
     var $headers = {"Accept": "application/json"};
-    return await api.postResponse( endPoint: getAuthUrl(), body: userInfo, headers: $headers);
+    var res = await api.postResponse( endPoint: getAuthUrl(), body: userInfo, headers: $headers);
+    return res;
   }
 
   // Stores the application password in shared preference
   saveAuthKeyToFile(Map appPass) async {
 
-    if (appPass.containsKey('new_password') && appPass.containsKey('user') && appPass['user'].containsKey('user_login')) {
+    print('Application Password');
+    print(appPass);
+
+    if (appPass != null && appPass.containsKey('new_password') && appPass.containsKey('user') && appPass['user'].containsKey('user_login')) {
 
       // INIT VARIABLES
       Map userInfo = appPass['user'];
