@@ -192,7 +192,7 @@ class PostData extends BaseData with ChangeNotifier {
     return null;
   }
 
-  Future actionFeaturedImage(context) async{
+  Future actionFeaturedImage(context) async {
     showLoader();
 
     var newImage = await showDialog(
@@ -207,12 +207,12 @@ class PostData extends BaseData with ChangeNotifier {
     hideLoader();
   }
 
-  void showLoader(){
+  void showLoader() {
     isLoading = true;
     notifyListeners();
   }
 
-  void hideLoader(){
+  void hideLoader() {
     isLoading = false;
     notifyListeners();
   }
@@ -241,7 +241,7 @@ class PostData extends BaseData with ChangeNotifier {
       builder: (BuildContext context) => RenameTitleDialog(title),
     );
 
-    if (title != null){
+    if (title != null) {
       this.title = title;
       notifyListeners();
       if (toString() != oldPostData) return true;
@@ -256,31 +256,29 @@ class PostData extends BaseData with ChangeNotifier {
     }
   }
 
-  Future<void> upload() async{
+  Future<void> upload() async {
+      showLoader();
 
-    showLoader();
+      // UPLOAD ALL THE MEDIA ATTACHMENTS INCLUDING THE FEATURED IMAGE
+      await uploadAttachments();
 
-    // UPLOAD ALL THE MEDIA ATTACHMENTS INCLUDING THE FEATURED IMAGE
-    await uploadAttachments();
+      // GET THE JSON DATA THAT NEEDS TO BE SENT TO THE SERVER
+      final postData = getDataForUpload();
 
-    // GET THE JSON DATA THAT NEEDS TO BE SENT TO THE SERVER
-    final postData = getDataForUpload();
-
-    if (id > 0) {
-
-      // NOT THE FIRST TIME WHILE SEND TO SERVER
-      await Wordpress.getInstance().updatePost(postData: postData, postId: id);
-    } else {
-
-      // SEND TO SERVER FOR THE FIRST TIME
-      var response =
-          await Wordpress.getInstance().createPost(postData: postData);
-      if (response.containsKey('id')) {
-        response = response;
-        id = response['id'];
+      if (id > 0) {
+        // NOT THE FIRST TIME WHILE SEND TO SERVER
+        await Wordpress.getInstance()
+            .updatePost(postData: postData, postId: id);
+      } else {
+        // SEND TO SERVER FOR THE FIRST TIME
+        var response =
+            await Wordpress.getInstance().createPost(postData: postData);
+        if (response.containsKey('id')) {
+          response = response;
+          id = response['id'];
+        }
       }
-    }
 
-    hideLoader();
+      hideLoader();
   }
 }

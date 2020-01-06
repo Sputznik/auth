@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:auth/models/post_data.dart';
 import 'package:provider/provider.dart';
@@ -6,15 +8,20 @@ import 'package:auth/models/posts_data.dart';
 class PostOptionsMenu extends StatefulWidget {
   final PostData post;
 
+  final scaffoldKey;
+
   final List hideActions;
 
-  PostOptionsMenu({@required this.post, this.hideActions});
+  PostOptionsMenu({@required this.scaffoldKey, @required this.post, this.hideActions});
 
   @override
   _PostOptionsState createState() => _PostOptionsState();
 }
 
 class _PostOptionsState extends State<PostOptionsMenu> {
+
+  //final _scaffoldKey = GlobalKey<ScaffoldState>();
+
   _PostOptionsState();
 
   Widget build(BuildContext context) {
@@ -54,54 +61,59 @@ class _PostOptionsState extends State<PostOptionsMenu> {
     return PopupMenuButton(
       //icon: Icon(Icons.cloud_upload),
       itemBuilder: (BuildContext context) => popMenuItems,
-      onSelected: (selectedItem) => onSelect(selectedItem),
+      onSelected: (selectedItem) => onSelect(selectedItem, context),
     );
   }
 
-  Future onSelect(String selectedItem) async {
+  Future onSelect(String selectedItem, BuildContext context) async {
     PostsCollection postsCollection =
         Provider.of<PostsCollection>(context, listen: false);
 
     PostData post =
         widget.post; //Provider.of<PostData>(context, listen: false);
 
-    switch (selectedItem) {
-      case 'rename':
-        bool toUpdate = await post.actionRenameTitle(context);
-        if (toUpdate) {
+    try {
+      switch (selectedItem) {
+        case 'rename':
+          bool toUpdate = await post.actionRenameTitle(context);
+          if (toUpdate) {
+            if (post.id > 0) {
+              post.upload();
+            }
+            postsCollection.write();
+          }
+          //print('rename title');
+          break;
+        case 'edit':
+          bool toUpdate = await post.actionEdit(context);
+          if (toUpdate) {
+            if (post.id > 0) {
+              post.upload();
+            }
+            postsCollection.write();
+          }
+          break;
+        case "set-featured":
+          await post.actionFeaturedImage(context);
           if (post.id > 0) {
             post.upload();
           }
           postsCollection.write();
-        }
-        //print('rename title');
-        break;
-      case 'edit':
-        bool toUpdate = await post.actionEdit(context);
-        if (toUpdate) {
+          break;
+        case "delete":
           if (post.id > 0) {
-            post.upload();
+            post.deleteFromServer();
           }
+          postsCollection.deleteItem(post);
+          break;
+        case "publish":
+          await post.upload();
           postsCollection.write();
-        }
-        break;
-      case "set-featured":
-        await post.actionFeaturedImage(context);
-        if (post.id > 0) {
-          post.upload();
-        }
-        postsCollection.write();
-        break;
-      case "delete":
-        if (post.id > 0) {
-          post.deleteFromServer();
-        }
-        postsCollection.deleteItem(post);
-        break;
-      case "publish":
-        await post.upload();
-        postsCollection.write();
-        break;
+          break;
+      }
+    } on SocketException catch (e) {
+      post.hideLoader();
+      widget.scaffoldKey.currentState.showSnackBar(SnackBar(content: Text('Error in connection!')));
     }
   }
 

@@ -14,6 +14,8 @@ class PostsList extends StatefulWidget {
 
 class _PostsState extends State<PostsList> {
 
+  final scaffoldKey = GlobalKey<ScaffoldState>();
+
   bool isLoading = false;
 
   @override
@@ -27,6 +29,7 @@ class _PostsState extends State<PostsList> {
   Widget build(BuildContext context) {
 
     return Scaffold(
+      key: scaffoldKey,
       appBar: AppBar(
         title: Text('Notes'),
         backgroundColor: Colors.red[900],
@@ -61,7 +64,7 @@ class _PostsState extends State<PostsList> {
         padding: EdgeInsets.only(top: 10.0),
         child: Selector<PostsCollection, int>(
           selector: (_, postsCollection) => postsCollection.posts.length,
-          builder: (context, collection, child) => PostList(),
+          builder: (context, collection, child) => PostList(scaffoldKey),
         )
       ),
     );

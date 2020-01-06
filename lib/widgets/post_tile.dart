@@ -7,7 +7,10 @@ import 'package:provider/provider.dart';
 import 'package:auth/models/posts_data.dart';
 
 class PostTile extends StatefulWidget {
-  PostTile();
+
+  final scaffoldKey;
+
+  PostTile(this.scaffoldKey);
 
   @override
   _PostTileState createState() => _PostTileState();
@@ -74,7 +77,7 @@ class _PostTileState extends State<PostTile> {
     return Container(
       padding: EdgeInsets.all(0),
       width: 30,
-      child: PostOptionsMenu(post: post),
+      child: PostOptionsMenu(post: post, scaffoldKey: widget.scaffoldKey,),
     );
   }
 

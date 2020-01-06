@@ -6,7 +6,9 @@ import 'package:provider/provider.dart';
 
 class PostList extends StatelessWidget {
 
-  PostList();
+  final scaffoldKey;
+
+  PostList(this.scaffoldKey);
 
   @override
   Widget build(BuildContext context) {
@@ -20,7 +22,7 @@ class PostList extends StatelessWidget {
     return posts.map(
             (post) => ChangeNotifierProvider<PostData>.value(
               value: post,
-              child: PostTile()
+              child: PostTile(this.scaffoldKey)
             )
     ).toList();
   }
