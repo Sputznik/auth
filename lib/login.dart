@@ -135,7 +135,7 @@ class _LoginPageState extends State<LoginPage> {
         validateText = 'Password cannot be empty';
         controller = _passwordController;
         obscureTextFlag = true;
-        icon = Icon(Icons.label);
+        icon = Icon(Icons.lock);
         break;
       case 'username':
         label = 'Email/Username';

@@ -27,7 +27,7 @@ class _UserDetailsState extends State<UserDetails> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(_displayName),
+        title: Text(_displayName.toUpperCase()),
         backgroundColor: Colors.red[900],
       ),
       body: Center(
