@@ -17,6 +17,13 @@ class _PostsState extends State<PostsList> {
 
   bool isLoading = false;
 
+  int selectedIndex = 0;
+  final widgetOptions = [
+    Text('Beer List'),
+    Text('Add new beer'),
+    Text('Favourites'),
+  ];
+
   @override
   void initState() {
     super.initState();
@@ -38,6 +45,12 @@ class _PostsState extends State<PostsList> {
             },
             icon: Icon(Icons.person),
           ),
+          IconButton(
+            onPressed: () {
+              Navigator.pushNamed(context, 'yka-home');
+            },
+            icon: Icon(Icons.chrome_reader_mode),
+          )
         ],
         leading: !isLoading
             ? null
@@ -62,7 +75,30 @@ class _PostsState extends State<PostsList> {
             selector: (_, postsCollection) => postsCollection.posts.length,
             builder: (context, collection, child) => PostList(scaffoldKey),
           )),
+      bottomNavigationBar: BottomNavigationBar(
+        items: <BottomNavigationBarItem>[
+          BottomNavigationBarItem(
+              icon: Icon(Icons.local_drink), title: Text('Posts')),
+          BottomNavigationBarItem(
+              icon: Icon(Icons.chrome_reader_mode), title: Text('Homepage')),
+        ],
+        currentIndex: selectedIndex,
+        fixedColor: Colors.deepPurple,
+        onTap: onItemTapped,
+      ),
     );
+  }
+
+  void onItemTapped(int index) {
+    setState(() {
+      selectedIndex = index;
+    });
+    switch(index){
+      case 0: break;
+      case 1:
+        Navigator.pushNamed(context, 'yka-home'); break;
+    }
+    print(index);
   }
 
   /*

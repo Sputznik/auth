@@ -1,5 +1,7 @@
+import 'package:auth/dashboard.dart';
 import 'package:auth/login.dart';
 import 'package:auth/user_details.dart';
+import 'package:auth/yka-home.dart';
 import 'package:flutter/material.dart';
 import 'models/posts_data.dart';
 import 'archives_view.dart';
@@ -17,7 +19,7 @@ void main() {
   runApp(
     MultiProvider(
       providers: [
-        ChangeNotifierProvider(builder: (context) => PostsCollection()),
+        ChangeNotifierProvider(create: (context) => PostsCollection()),
       ],
       child: QuickStartApp(),
     ),
@@ -73,8 +75,10 @@ class _QuickStartAppState extends State<QuickStartApp> {
 //      initialRoute: _appRoute,
       routes: {
         "login": (BuildContext context) => LoginPage(autologin: false,),
+        "dashboard" : (BuildContext context) => Dashboard(),
         "posts": (BuildContext context) => PostsList(),
         "userInfo": (BuildContext context) => UserDetails(),
+        "yka-home": (BuildContext context) => YkaHomepage()
       },
       home: buildHome(),
 //        home: homepage,
@@ -84,7 +88,7 @@ class _QuickStartAppState extends State<QuickStartApp> {
 //  buildHome() => PostsList();
 
   buildHome(){
-    if(_isLoggedIn != null) return (_isLoggedIn) ? PostsList() : LoginPage(autologin: false,);
+    if(_isLoggedIn != null) return (_isLoggedIn) ? Dashboard() : LoginPage(autologin: false,);
     return LoginPage(autologin: true);
   }
 }
