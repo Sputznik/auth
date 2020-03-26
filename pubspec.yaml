@@ -35,7 +35,8 @@ dependencies:
   shared_preferences:
   cached_network_image:
   webview_flutter:
-
+  flutter_html:
+  flutter_web_browser:
 
 
 dev_dependencies:

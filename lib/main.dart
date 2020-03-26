@@ -2,6 +2,8 @@ import 'package:auth/dashboard.dart';
 import 'package:auth/login.dart';
 import 'package:auth/user_details.dart';
 import 'package:auth/yka-home.dart';
+import 'package:auth/yka_posts.dart';
+import 'package:auth/yka_single_post.dart';
 import 'package:flutter/material.dart';
 import 'models/posts_data.dart';
 import 'archives_view.dart';
@@ -78,7 +80,10 @@ class _QuickStartAppState extends State<QuickStartApp> {
         "dashboard" : (BuildContext context) => Dashboard(),
         "posts": (BuildContext context) => PostsList(),
         "userInfo": (BuildContext context) => UserDetails(),
-        "yka-home": (BuildContext context) => YkaHomepage()
+        "yka-home": (BuildContext context) => YkaHomepage(),
+        "yka-posts": (BuildContext context) => YkaPosts(),
+        "yka-single-post": (BuildContext context) => YkaSinglePost()
+
       },
       home: buildHome(),
 //        home: homepage,
