@@ -65,6 +65,16 @@ class _YkaPostsState extends State<YkaPosts> {
           title: Text('Posts'),
           centerTitle: true,
           backgroundColor: Colors.red[900],
+          actions: <Widget>[
+            IconButton(
+              icon: Icon(Icons.search),
+              onPressed: () {
+                print('Search');
+                //showSearch(context: context, delegate: DataSearch());
+                Navigator.pushNamed(context, 'yka-search');
+              },
+            )
+          ],
         ),
         body: isLoading ? postLoader() : buildPostContainer());
   }
@@ -128,7 +138,10 @@ class _YkaPostsState extends State<YkaPosts> {
           buildPostImage(index),
           Container(
             padding: EdgeInsets.all(10),
-            width: MediaQuery.of(context).size.width - (90 + 30 + 30),
+            width: MediaQuery
+                .of(context)
+                .size
+                .width - (90 + 30 + 30),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.start,
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -153,16 +166,18 @@ class _YkaPostsState extends State<YkaPosts> {
       child: CachedNetworkImage(
         fit: BoxFit.cover,
         imageUrl: posts[index].postFeatured,
-        placeholder: (context, url) => Container(
-          alignment: Alignment.center,
-          height: 50.0,
-          width: 50.0,
-          child: CircularProgressIndicator(),
-        ),
-        errorWidget: (context, url, error) => Image.asset(
-          'assets/default.png',
-          fit: BoxFit.cover,
-        ),
+        placeholder: (context, url) =>
+            Container(
+              alignment: Alignment.center,
+              height: 50.0,
+              width: 50.0,
+              child: CircularProgressIndicator(),
+            ),
+        errorWidget: (context, url, error) =>
+            Image.asset(
+              'assets/default.png',
+              fit: BoxFit.cover,
+            ),
       ),
     );
   }

@@ -1,5 +1,6 @@
 import 'package:auth/dashboard.dart';
 import 'package:auth/login.dart';
+import 'package:auth/search_bar.dart';
 import 'package:auth/user_details.dart';
 import 'package:auth/yka-home.dart';
 import 'package:auth/yka_posts.dart';
@@ -11,12 +12,10 @@ import 'package:provider/provider.dart';
 import "helpers/wp.dart";
 
 void main() {
-
   // SET THE BASE URL FOR THE WORDPRESS API
   //Wordpress.getInstance().initialize('https://churchbuzz.in/wp-json/');
   Wordpress.getInstance().initialize('https://www.ykasandbox.com/');
   //Wordpress.getInstance().initialize('http://192.168.43.225/wordpress/');
-
 
   runApp(
     MultiProvider(
@@ -31,10 +30,8 @@ void main() {
 }
 
 class QuickStartApp extends StatefulWidget {
-
   @override
   State<StatefulWidget> createState() => _QuickStartAppState();
-
 }
 
 class _QuickStartAppState extends State<QuickStartApp> {
@@ -47,7 +44,6 @@ class _QuickStartAppState extends State<QuickStartApp> {
   }
 
   _autoLogin() async {
-
     bool flag = await Wordpress.getInstance().hasValidAuthKey();
 
     //print('Flag below');
@@ -76,14 +72,16 @@ class _QuickStartAppState extends State<QuickStartApp> {
       title: 'Notes',
 //      initialRoute: _appRoute,
       routes: {
-        "login": (BuildContext context) => LoginPage(autologin: false,),
-        "dashboard" : (BuildContext context) => Dashboard(),
+        "login": (BuildContext context) => LoginPage(
+              autologin: false,
+            ),
+        "dashboard": (BuildContext context) => Dashboard(),
         "posts": (BuildContext context) => PostsList(),
         "userInfo": (BuildContext context) => UserDetails(),
         "yka-home": (BuildContext context) => YkaHomepage(),
         "yka-posts": (BuildContext context) => YkaPosts(),
-        "yka-single-post": (BuildContext context) => YkaSinglePost()
-
+        "yka-single-post": (BuildContext context) => YkaSinglePost(),
+        'yka-search': (BuildContext context) => YkaSearchPosts()
       },
       home: buildHome(),
 //        home: homepage,
@@ -92,8 +90,13 @@ class _QuickStartAppState extends State<QuickStartApp> {
 
 //  buildHome() => PostsList();
 
-  buildHome(){
-    if(_isLoggedIn != null) return (_isLoggedIn) ? Dashboard() : LoginPage(autologin: false,);
+  buildHome() {
+    if (_isLoggedIn != null)
+      return (_isLoggedIn)
+          ? Dashboard()
+          : LoginPage(
+              autologin: false,
+            );
     return LoginPage(autologin: true);
   }
 }
