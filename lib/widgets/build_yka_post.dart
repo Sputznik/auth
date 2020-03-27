@@ -8,7 +8,8 @@ class BuildYkaPost extends StatelessWidget {
   final int index;
   final BuildContext context;
 
-  BuildYkaPost({this.posts, this.index, this.context});
+  BuildYkaPost(
+      {@required this.posts, @required this.index, @required this.context});
 
   @override
   Widget build(BuildContext context) {
