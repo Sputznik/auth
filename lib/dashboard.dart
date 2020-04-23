@@ -1,3 +1,4 @@
+import 'package:auth/search_bar.dart';
 import 'package:auth/yka_posts.dart';
 import 'package:flutter/material.dart';
 import 'package:auth/archives_view.dart';
@@ -11,7 +12,7 @@ class Dashboard extends StatefulWidget {
 class _DashboardState extends State<Dashboard> {
   int _currentIndex = 0;
 
-  final List<Widget> _children = [PostsList(), YkaHomepage(), YkaPosts()];
+  final List<Widget> _children = [YkaPosts(), YkaSearchPosts(), PostsList()];
 
   @override
   Widget build(BuildContext context) {
@@ -32,11 +33,11 @@ class _DashboardState extends State<Dashboard> {
     return BottomNavigationBar(
       items: <BottomNavigationBarItem>[
         BottomNavigationBarItem(
-            icon: Icon(Icons.library_books), title: Text('All Posts')),
+            icon: Icon(Icons.library_books), title: Text('Staff Picks')),
         BottomNavigationBarItem(
-            icon: Icon(Icons.chrome_reader_mode), title: Text('Homepage')),
+            icon: Icon(Icons.search), title: Text('Search')),
         BottomNavigationBarItem(
-            icon: Icon(Icons.all_out), title: Text('Posts')),
+            icon: Icon(Icons.all_out), title: Text('Your Posts')),
       ],
       currentIndex: _currentIndex,
       fixedColor: Colors.red[900],
