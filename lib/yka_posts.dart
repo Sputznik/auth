@@ -21,6 +21,8 @@ class _YkaPostsState extends State<YkaPosts> {
 
   bool isLoading = false;
 
+  bool hasPosts = true;
+
   List<WpPost> posts = [];
 
   loadPostsData() async {
@@ -28,20 +30,33 @@ class _YkaPostsState extends State<YkaPosts> {
     isLoading = true;
 
     var list = await _wordpress.getPosts(
-        endPoint: 'wp-json/wp/v2/posts?page=$page&per_page=5&status=publish');
-    var finalList = await loadPosts(list);
+        endPoint:
+            'wp-json/wp/v2/posts?page=$page&category=25915&per_page=10&status=publish');
 
-    /*Loops through all the fetched posts and
+    //print('Array Length: ' + list.runtimeType.toString());
+
+    if (!(list.runtimeType == Null)) {
+      var finalList = await loadPosts(list);
+
+      /*Loops through all the fetched posts and
     **Stores all the posts in posts[] list.
     */
-    for (var i = 0; i < finalList.length; i++) {
-      posts.add(finalList[i]);
+      for (var i = 0; i < finalList.length; i++) {
+        posts.add(finalList[i]);
+      }
     }
+
+    if (list.runtimeType == Null) {
+      hasPosts = false;
+    }
+
     /**
      * Hides loader after the data
      * has been fetched from the server
      */
-    setState(() => isLoading = false);
+    setState(() {
+      isLoading = false;
+    });
   }
 
   @override
@@ -64,16 +79,6 @@ class _YkaPostsState extends State<YkaPosts> {
           title: Text('Posts'),
           centerTitle: true,
           backgroundColor: Colors.red[900],
-          actions: <Widget>[
-            IconButton(
-              icon: Icon(Icons.search),
-              onPressed: () {
-                //print('Search');
-                //showSearch(context: context, delegate: DataSearch());
-                Navigator.pushNamed(context, 'yka-search');
-              },
-            )
-          ],
         ),
         body: isLoading ? postLoader() : buildPostContainer());
   }
@@ -89,11 +94,25 @@ class _YkaPostsState extends State<YkaPosts> {
             //Shows bottom loader
             if (index == posts.length) {
               return Container(
-                  padding: EdgeInsets.only(top: 10.0),
-                  child: CupertinoActivityIndicator());
+                padding: EdgeInsets.only(top: 10.0),
+                child: loadMore(),
+              );
             }
             return BuildYkaPost(context: context, index: index, posts: posts);
           }),
+    );
+  }
+
+  Widget loadMore() => hasPosts ? CupertinoActivityIndicator() : noPosts();
+
+  //Show message when no more posts are available
+  Widget noPosts() {
+    return Container(
+      child: Text(
+        'There are no more posts to show right now.',
+        style: TextStyle(fontWeight: FontWeight.bold),
+        textAlign: TextAlign.center,
+      ),
     );
   }
 
