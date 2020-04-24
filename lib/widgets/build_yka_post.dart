@@ -90,14 +90,16 @@ class BuildYkaPost extends StatelessWidget {
 
   Widget buildPostDate(index) {
     var published = timeago.format(posts[index].postDate);
-    return Row(
-      children: <Widget>[
-        Text(
-          'Published $published',
-          style: TextStyle(fontWeight: FontWeight.w300),
-        ),
-        SizedBox(width: 5.0),
-      ],
+    return Flexible(
+      child: Row(
+        children: <Widget>[
+          Text(
+            'Published $published',
+            style: TextStyle(fontWeight: FontWeight.w300),
+          ),
+          SizedBox(width: 5.0),
+        ],
+      ),
     );
   }
 }
