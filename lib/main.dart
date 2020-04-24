@@ -10,6 +10,7 @@ import 'models/posts_data.dart';
 import 'archives_view.dart';
 import 'package:provider/provider.dart';
 import "helpers/wp.dart";
+import 'package:flutter/services.dart';
 
 void main() {
   // SET THE BASE URL FOR THE WORDPRESS API
@@ -17,14 +18,19 @@ void main() {
   Wordpress.getInstance().initialize('https://www.ykasandbox.com/');
   //Wordpress.getInstance().initialize('http://192.168.43.225/wordpress/');
 
-  runApp(
-    MultiProvider(
-      providers: [
-        ChangeNotifierProvider(create: (context) => PostsCollection()),
-      ],
-      child: QuickStartApp(),
-    ),
-  );
+  //Forces device orientation to be Portrait only.
+  WidgetsFlutterBinding.ensureInitialized();
+  SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp])
+      .then((_) {
+    runApp(
+      MultiProvider(
+        providers: [
+          ChangeNotifierProvider(create: (context) => PostsCollection()),
+        ],
+        child: QuickStartApp(),
+      ),
+    );
+  });
 
   //runApp(QuickStartApp());
 }
