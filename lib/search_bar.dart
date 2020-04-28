@@ -30,7 +30,7 @@ class _YkaSearchPostsState extends State<YkaSearchPosts> {
         backgroundColor: Colors.red[900],
         leading: IconButton(
           icon: Icon(Icons.arrow_back),
-          onPressed: () => Navigator.pop(context),
+          onPressed: () => Navigator.pushReplacementNamed(context, 'dashboard'),
         ),
         actions: <Widget>[
           IconButton(
