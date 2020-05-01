@@ -18,13 +18,10 @@ class _LoginPageState extends State<LoginPage> {
 
   bool loadingFlag = false;
 
+  bool isVisible = false;
+
   static final _emailController = TextEditingController();
   static final _passwordController = TextEditingController();
-
-  @override
-  void initState() {
-    super.initState();
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -45,8 +42,14 @@ class _LoginPageState extends State<LoginPage> {
         Opacity(opacity: 0.5, child: buildForm()),
         Container(
           alignment: Alignment.center,
-          width: MediaQuery.of(context).size.width,
-          height: MediaQuery.of(context).size.height,
+          width: MediaQuery
+              .of(context)
+              .size
+              .width,
+          height: MediaQuery
+              .of(context)
+              .size
+              .height,
           child: CircularProgressIndicator(),
         ),
       ],
@@ -87,7 +90,7 @@ class _LoginPageState extends State<LoginPage> {
       child: loadingFlag
           ? loadingIcon()
           : Text('Login',
-              style: TextStyle(color: Colors.white, fontSize: 15.0)),
+          style: TextStyle(color: Colors.white, fontSize: 15.0)),
     );
   }
 
@@ -120,14 +123,23 @@ class _LoginPageState extends State<LoginPage> {
     TextEditingController controller;
     bool obscureTextFlag = false;
     Icon icon = Icon(Icons.person);
+    Widget suffIcon;
 
     switch (type) {
       case 'password':
         label = 'Password';
         validateText = 'Password cannot be empty';
         controller = _passwordController;
-        obscureTextFlag = true;
+        obscureTextFlag = isVisible ? false : true;
         icon = Icon(Icons.lock);
+        suffIcon = GestureDetector(
+          child: isVisible
+              ? Icon(Icons.visibility, color: Colors.red)
+              : Icon(Icons.visibility_off, color: Colors.grey),
+          onTap: () {
+            setState(() => isVisible = !isVisible);
+          },
+        );
         break;
       case 'username':
         label = 'Email/Username';
@@ -152,6 +164,7 @@ class _LoginPageState extends State<LoginPage> {
         contentPadding: EdgeInsets.fromLTRB(20.0, 12.0, 20.0, 12.0),
         labelText: label,
         prefixIcon: icon,
+        suffixIcon: suffIcon != null ? suffIcon : null,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(20.0),
         ),
