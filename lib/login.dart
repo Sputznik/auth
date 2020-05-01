@@ -3,9 +3,7 @@ import 'dart:convert';
 import 'helpers/wp.dart';
 import 'package:flutter/material.dart';
 
-
 class LoginPage extends StatefulWidget {
-
   final bool autologin;
 
   LoginPage({@required this.autologin});
@@ -23,19 +21,13 @@ class _LoginPageState extends State<LoginPage> {
   static final _emailController = TextEditingController();
   static final _passwordController = TextEditingController();
 
-  TextFormField _emailField;
-  TextFormField _passwordField;
-
   @override
   void initState() {
     super.initState();
-    _emailField = buildTextFormField('username');
-    _passwordField = buildTextFormField('password');
   }
 
   @override
   Widget build(BuildContext context) {
-
     //print('widget.autologin');
     //print(widget.autologin);
 
@@ -47,13 +39,10 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 
-  Widget buildAutoLoginWidget(){
+  Widget buildAutoLoginWidget() {
     return Stack(
       children: <Widget>[
-        Opacity(
-            opacity: 0.5,
-            child: buildForm()
-        ),
+        Opacity(opacity: 0.5, child: buildForm()),
         Container(
           alignment: Alignment.center,
           width: MediaQuery.of(context).size.width,
@@ -64,7 +53,7 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 
-  Widget buildForm(){
+  Widget buildForm() {
     return Form(
       key: _formKey,
       child: Center(
@@ -74,9 +63,9 @@ class _LoginPageState extends State<LoginPage> {
           children: <Widget>[
             buildFormHeading(),
             SizedBox(height: 20.0),
-            _emailField,
+            buildTextFormField('username'),
             SizedBox(height: 20.0),
-            _passwordField,
+            buildTextFormField('password'),
             SizedBox(height: 20.0),
             buildFormButton(),
           ],
@@ -95,7 +84,10 @@ class _LoginPageState extends State<LoginPage> {
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(20.0),
       ),
-      child: loadingFlag ? loadingIcon() : Text('Login', style: TextStyle(color: Colors.white, fontSize: 15.0)),
+      child: loadingFlag
+          ? loadingIcon()
+          : Text('Login',
+              style: TextStyle(color: Colors.white, fontSize: 15.0)),
     );
   }
 
@@ -192,7 +184,8 @@ class _LoginPageState extends State<LoginPage> {
 
       // GET THE APPLICATION PASSWORD FROM THE SERVER
       Map appPass = await wp.webLogin(username, password);
-      print( 'App details:'); print(appPass);
+      print('App details:');
+      print(appPass);
 
       // HIDE LOADER
       hideLoaderBtn();
