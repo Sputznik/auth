@@ -1,8 +1,7 @@
 import 'dart:convert';
-import 'package:auth/helpers/wp.dart';
-import 'package:auth/models/categories-model.dart';
-import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'package:auth/models/categories-model.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class CategoriesList extends StatefulWidget {
@@ -89,8 +88,7 @@ class _CategoriesListState extends State<CategoriesList> {
 
   onConfirmTopics() {
     setTopicsSeen(); //SET THE TOPICS SEEN VALUE
-    Navigator.pushReplacementNamed(
-        context, 'dashboard'); // REDIRECTS TO THE DASHBOARD
+    Navigator.pushReplacementNamed(context, 'dashboard'); // REDIRECTS TO THE DASHBOARD
   }
 
   setTopicsSeen() async {

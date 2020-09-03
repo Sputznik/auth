@@ -1,6 +1,7 @@
 import 'package:auth/helpers/wp.dart';
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class UserDetails extends StatefulWidget {
   @override
@@ -8,16 +9,13 @@ class UserDetails extends StatefulWidget {
 }
 
 class _UserDetailsState extends State<UserDetails> {
+  Wordpress wp = Wordpress.getInstance();
   String _displayName = '';
-  String _emailID = '';
   String _avatar = '';
 
   @override
   void initState() {
     super.initState();
-
-    Wordpress wp = Wordpress.getInstance();
-
     this._displayName = wp.user.name;
     this._avatar = wp.user.avatar_urls['96'];
     print(wp.user.avatar_urls['96']);
@@ -40,7 +38,7 @@ class _UserDetailsState extends State<UserDetails> {
                 placeholder: (context, url) => new CircularProgressIndicator(),
                 errorWidget: (context, url, error) => new Icon(Icons.error),
                 width: 80.0,
-                  height: 80.0,
+                height: 80.0,
               ),
             ),
             SizedBox(height: 40.0),
@@ -50,6 +48,7 @@ class _UserDetailsState extends State<UserDetails> {
                 color: Colors.red[900],
                 onPressed: () {
                   _deleteAuthKey(context);
+                  _deleteAppData(context);
                 },
                 child: Text(
                   'Logout',
@@ -71,5 +70,12 @@ class _UserDetailsState extends State<UserDetails> {
     Wordpress.getInstance().disposeAuthKeyFromFile();
     Navigator.of(context)
         .pushNamedAndRemoveUntil('login', (Route<dynamic> route) => false);
+  }
+
+  // Delete App Data stored in shared preference
+  _deleteAppData(BuildContext context) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    prefs.setString('categories', '');
+    prefs.setBool('topics', false);
   }
 }

@@ -57,10 +57,8 @@ class _QuickStartAppState extends State<QuickStartApp> {
     SharedPreferences prefs = await SharedPreferences.getInstance();
 
     bool _seen = (prefs.getBool('topics') ?? false); //Setter in Categories List
-    print('Seen' + _seen.toString());
 
-    setState(() =>
-        _initialScreen = _seen); //SETS THE INITIAL SCREEN AFTER AUTO-LOGIN
+    setState(() => _initialScreen = _seen); //SETS THE INITIAL SCREEN AFTER AUTO-LOGIN
     _autoLogin(); // INVOKE AUTO-LOGIN
   }
 
