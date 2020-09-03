@@ -82,7 +82,6 @@ class _CategoriesListState extends State<CategoriesList> {
   }
 
   Future<List<Topic>> getData() async {
-    print('topics Here');
     var response = await http.get(
         'https://www.ykasandbox.com/wp-admin/admin-ajax.php?action=get_categories');
     return Categories.fromJson(json.decode(response.body)).topics;
