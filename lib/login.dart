@@ -214,7 +214,7 @@ class _LoginPageState extends State<LoginPage> {
         resetForm();
 
         // REDIRECT TO THE NEXT SCREEN
-        Navigator.pushReplacementNamed(context, 'dashboard');
+        Navigator.pushReplacementNamed(context, 'topics');
       }
     }
   }

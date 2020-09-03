@@ -33,6 +33,7 @@ class WpPost {
       postExcerpt: PostExcerpt.fromJson(posts['excerpt']),
       postContent: PostContent.fromJson(posts['content']),
       postFeatured: posts['featured_image'],
+      //https://encrypted-tbn0.gstatic.com/images?q=tbn%3AANd9GcSRDghwEbWdEtpO_hkmd95jfRLBJDrGLJe16g&usqp=CAU
     );
   }
 

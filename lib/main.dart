@@ -1,3 +1,4 @@
+import 'package:auth/choose_categories.dart';
 import 'package:auth/dashboard.dart';
 import 'package:auth/login.dart';
 import 'package:auth/search_bar.dart';
@@ -6,6 +7,7 @@ import 'package:auth/yka-home.dart';
 import 'package:auth/yka_posts.dart';
 import 'package:auth/yka_single_post.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'models/posts_data.dart';
 import 'archives_view.dart';
 import 'package:provider/provider.dart';
@@ -16,7 +18,7 @@ void main() {
   // SET THE BASE URL FOR THE WORDPRESS API
   //Wordpress.getInstance().initialize('https://churchbuzz.in/wp-json/');
   Wordpress.getInstance().initialize('https://www.ykasandbox.com/');
-  //Wordpress.getInstance().initialize('http://192.168.43.225/wordpress/');
+//  Wordpress.getInstance().initialize('http://192.168.43.225/yka/');
 
   //Forces device orientation to be Portrait only.
   WidgetsFlutterBinding.ensureInitialized();
@@ -42,11 +44,24 @@ class QuickStartApp extends StatefulWidget {
 
 class _QuickStartAppState extends State<QuickStartApp> {
   bool _isLoggedIn;
+  bool _initialScreen = false;
 
   @override
   void initState() {
     super.initState();
-    _autoLogin();
+    checkTopicsSeen();
+  }
+
+  // CHECKS WHETHER THE TOPICS ARE SELECTED OR NOT
+  checkTopicsSeen() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+
+    bool _seen = (prefs.getBool('topics') ?? false); //Setter in Categories List
+    print('Seen' + _seen.toString());
+
+    setState(() =>
+        _initialScreen = _seen); //SETS THE INITIAL SCREEN AFTER AUTO-LOGIN
+    _autoLogin(); // INVOKE AUTO-LOGIN
   }
 
   _autoLogin() async {
@@ -87,7 +102,8 @@ class _QuickStartAppState extends State<QuickStartApp> {
         "yka-home": (BuildContext context) => YkaHomepage(),
         "yka-posts": (BuildContext context) => YkaPosts(),
         "yka-single-post": (BuildContext context) => YkaSinglePost(),
-        'yka-search': (BuildContext context) => YkaSearchPosts()
+        'yka-search': (BuildContext context) => YkaSearchPosts(),
+        'topics': (BuildContext context) => CategoriesList()
       },
       home: buildHome(),
 //        home: homepage,
@@ -97,12 +113,10 @@ class _QuickStartAppState extends State<QuickStartApp> {
 //  buildHome() => PostsList();
 
   buildHome() {
+    Widget screen = !_initialScreen ? CategoriesList() : Dashboard();
+
     if (_isLoggedIn != null)
-      return (_isLoggedIn)
-          ? Dashboard()
-          : LoginPage(
-              autologin: false,
-            );
+      return (_isLoggedIn) ? screen : LoginPage(autologin: false);
     return LoginPage(autologin: true);
   }
 }

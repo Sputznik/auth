@@ -25,7 +25,6 @@ dependencies:
   cupertino_icons: ^0.1.2
   http:
   flutter_wordpress: ^0.1.4
-  zefyr:
   quill_delta:
   image_picker:
   timeago:
@@ -37,6 +36,10 @@ dependencies:
   webview_flutter:
   flutter_html:
   flutter_web_browser:
+  zefyr:
+    git:
+      url: https://github.com/memspace/zefyr.git
+      path: packages/zefyr
 
 
 dev_dependencies:
