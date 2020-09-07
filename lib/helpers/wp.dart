@@ -48,7 +48,8 @@ class Wordpress {
     if (endPoint == null) {
       endPoint = getPostsUrl();
     }
-    return await api.postResponse(endPoint: endPoint, body: postData, base64: user.authKey);
+    return await api.postResponse(
+        endPoint: endPoint, body: postData, base64: user.authKey);
   }
 
   updatePost({@required postData, @required int postId, endPoint}) async {
@@ -56,7 +57,8 @@ class Wordpress {
       endPoint = getPostsUrl();
     }
     endPoint += "/" + postId.toString();
-    return await api.postResponse(endPoint: endPoint, body: postData, base64: user.authKey);
+    return await api.postResponse(
+        endPoint: endPoint, body: postData, base64: user.authKey);
   }
 
   deletePost(int postId) async {
@@ -78,7 +80,10 @@ class Wordpress {
       'Content-type': '$mimeTypeData'
     };
 
-    return await api.postResponse( endPoint:getMediaUrl(), body:file.readAsBytesSync(), headers:headers);
+    return await api.postResponse(
+        endPoint: getMediaUrl(),
+        body: file.readAsBytesSync(),
+        headers: headers);
   }
 
   Future<List> getPosts({endPoint}) async {
@@ -89,26 +94,30 @@ class Wordpress {
     return posts;
   }
 
-
-
   webLogin(String _username, String _password) async {
     final Map<String, dynamic> userInfo = {
       'ukey': base64.encode(utf8.encode(_username)),
       'pkey': base64.encode(utf8.encode(_password))
     };
     var $headers = {"Accept": "application/json"};
-    var res = await api.postResponse( endPoint: getAuthUrl(), body: userInfo, headers: $headers);
-    return res;
+    try {
+      var res = await api.postResponse(endPoint: getAuthUrl(), body: userInfo, headers: $headers);
+      print(res);
+      return res;
+    } catch (e) {
+      return null;
+    }
   }
 
   // Stores the application password in shared preference
   saveAuthKeyToFile(Map appPass) async {
-
     print('Application Password');
     print(appPass);
 
-    if (appPass != null && appPass.containsKey('new_password') && appPass.containsKey('user') && appPass['user'].containsKey('user_login')) {
-
+    if (appPass != null &&
+        appPass.containsKey('new_password') &&
+        appPass.containsKey('user') &&
+        appPass['user'].containsKey('user_login')) {
       // INIT VARIABLES
       Map userInfo = appPass['user'];
       String username = userInfo['user_login'];
@@ -119,12 +128,10 @@ class Wordpress {
 
       // FETCH USER DETAILS FROM THE SERVER & SAVING TO FILE
       await setUserFromServer(authKey);
-
-
     }
   }
 
-  disposeAuthKeyFromFile() async{
+  disposeAuthKeyFromFile() async {
     final preference = await SharedPreferences.getInstance();
     preference.remove('wp_user');
   }
@@ -133,14 +140,14 @@ class Wordpress {
   setUserFromFile() async {
     final preference = await SharedPreferences.getInstance();
     String userdata = preference.getString('wp_user');
-    if(userdata != null){
+    if (userdata != null) {
       Map data = jsonDecode(userdata);
       this.user = WordpressUser(data);
     }
   }
 
   // SET WORDPRESS USER FROM SERVER
-  setUserFromServer(authKey) async{
+  setUserFromServer(authKey) async {
     Map serverUser = await api.getResponse(getMeUrl(), authKey);
     serverUser['authKey'] = authKey;
     this.user = WordpressUser(serverUser);
@@ -152,7 +159,6 @@ class Wordpress {
 
   // IN CASE THE INTERNET IS NOT THERE BUT THE AUTHKEY IS PRESENT THEN ALLOW THE USER TO BE AUTHENTICATED FOR THE TIME BEING
   Future<bool> hasValidAuthKey() async {
-
     print('checking for valid auth key');
 
     await setUserFromFile();
@@ -161,19 +167,14 @@ class Wordpress {
     //print(this.user);
 
     if (this.user != null && this.user.authKey != null) {
-
-      try{
+      try {
         setUserFromServer(this.user.authKey);
 
-        if(this.user.isValidUser()) return true;
-
-      } on Exception catch(e){
-
+        if (this.user.isValidUser()) return true;
+      } on Exception catch (e) {
         return true;
-
       }
     }
     return false;
   }
 }
-

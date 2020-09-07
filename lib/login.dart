@@ -42,14 +42,8 @@ class _LoginPageState extends State<LoginPage> {
         Opacity(opacity: 0.5, child: buildForm()),
         Container(
           alignment: Alignment.center,
-          width: MediaQuery
-              .of(context)
-              .size
-              .width,
-          height: MediaQuery
-              .of(context)
-              .size
-              .height,
+          width: MediaQuery.of(context).size.width,
+          height: MediaQuery.of(context).size.height,
           child: CircularProgressIndicator(),
         ),
       ],
@@ -90,7 +84,7 @@ class _LoginPageState extends State<LoginPage> {
       child: loadingFlag
           ? loadingIcon()
           : Text('Login',
-          style: TextStyle(color: Colors.white, fontSize: 15.0)),
+              style: TextStyle(color: Colors.white, fontSize: 15.0)),
     );
   }
 
@@ -106,12 +100,15 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   // GET THE SNACKBAR FOR ERROR
-  Widget snackbarError(response) {
+  Widget snackbarError({response = ''}) {
     Widget snackBar;
     if (response['errors'].containsKey('invalid_username')) {
       snackBar = SnackBar(content: Text('Invalid Username!'));
     } else if (response['errors'].containsKey('incorrect_password')) {
       snackBar = SnackBar(content: Text('Incorrect Password!'));
+    } else if (response['errors'].containsKey('no-internet')) {
+      snackBar = SnackBar(
+          content: Text('Check your internet connection and try again!'));
     }
     return snackBar;
   }
@@ -198,23 +195,31 @@ class _LoginPageState extends State<LoginPage> {
       // GET THE APPLICATION PASSWORD FROM THE SERVER
       Map appPass = await wp.webLogin(username, password);
       print('App details:');
-      print(appPass);
+      print('APP PASS' + appPass.toString());
 
       // HIDE LOADER
       hideLoaderBtn();
 
-      // SAVE THE NEWLY ACQUIRED AUTH KEY
-      await wp.saveAuthKeyToFile(appPass);
+      if (appPass != null) {
+        // SAVE THE NEWLY ACQUIRED AUTH KEY
+        await wp.saveAuthKeyToFile(appPass);
 
-      if (appPass.containsKey('errors')) {
-        // Show SnackBar if the username/password is not valid
-        _scaffoldKey.currentState.showSnackBar(snackbarError(appPass));
+        if (appPass.containsKey('errors')) {
+          // Show SnackBar if the username/password is not valid
+          _scaffoldKey.currentState
+              .showSnackBar(snackbarError(response: appPass));
+        } else {
+          // RESET FORM
+          resetForm();
+
+          // REDIRECT TO THE NEXT SCREEN
+          Navigator.pushReplacementNamed(context, 'topics');
+        }
       } else {
-        // RESET FORM
-        resetForm();
-
-        // REDIRECT TO THE NEXT SCREEN
-        Navigator.pushReplacementNamed(context, 'topics');
+        Map<String, dynamic> errors = {
+          'errors': {"no-internet": "Socket"}
+        };
+        _scaffoldKey.currentState.showSnackBar(snackbarError(response: errors));
       }
     }
   }
