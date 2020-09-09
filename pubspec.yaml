@@ -28,7 +28,8 @@ dependencies:
   quill_delta:
   image_picker:
   timeago:
-  provider:
+  provider: ^4.0.4
+  data_connection_checker: ^0.3.4
   connectivity:
   mime:
   shared_preferences:

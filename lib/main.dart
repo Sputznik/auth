@@ -2,10 +2,12 @@ import 'package:auth/choose_categories.dart';
 import 'package:auth/dashboard.dart';
 import 'package:auth/login.dart';
 import 'package:auth/search_bar.dart';
+import 'package:auth/services/data_connectivity_service.dart';
 import 'package:auth/user_details.dart';
 import 'package:auth/yka-home.dart';
 import 'package:auth/yka_posts.dart';
 import 'package:auth/yka_single_post.dart';
+import 'package:data_connection_checker/data_connection_checker.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'models/posts_data.dart';
@@ -18,8 +20,8 @@ void main() {
   // SET THE BASE URL FOR THE WORDPRESS API
   //Wordpress.getInstance().initialize('https://churchbuzz.in/wp-json/');
   Wordpress.getInstance().initialize('https://www.ykasandbox.com/');
- // Wordpress.getInstance().initialize('http://192.168.43.225/yka/');
- // Wordpress.getInstance().initialize('http://192.168.43.98/yka/');
+  // Wordpress.getInstance().initialize('http://192.168.43.225/yka/');
+  // Wordpress.getInstance().initialize('http://192.168.43.98/yka/');
   //Forces device orientation to be Portrait only.
   WidgetsFlutterBinding.ensureInitialized();
   SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp])
@@ -27,6 +29,9 @@ void main() {
     runApp(
       MultiProvider(
         providers: [
+          StreamProvider<DataConnectionStatus>(create: (context) {
+            return DataConnectivityService().connectivityStreamController.stream;
+          }),
           ChangeNotifierProvider(create: (context) => PostsCollection()),
         ],
         child: QuickStartApp(),
@@ -58,7 +63,8 @@ class _QuickStartAppState extends State<QuickStartApp> {
 
     bool _seen = (prefs.getBool('topics') ?? false); //Setter in Categories List
 
-    setState(() => _initialScreen = _seen); //SETS THE INITIAL SCREEN AFTER AUTO-LOGIN
+    setState(() =>
+        _initialScreen = _seen); //SETS THE INITIAL SCREEN AFTER AUTO-LOGIN
     _autoLogin(); // INVOKE AUTO-LOGIN
   }
 
