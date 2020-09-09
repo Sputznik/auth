@@ -1,4 +1,6 @@
+import 'dart:async';
 import 'dart:convert';
+import 'package:data_connection_checker/data_connection_checker.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:auth/models/categories-model.dart';
@@ -12,12 +14,34 @@ class CategoriesList extends StatefulWidget {
 class _CategoriesListState extends State<CategoriesList> {
   List _selectedTopics = List();
   Future<List<Topic>> _listTopics;
+  StreamSubscription<DataConnectionStatus> listener;
 
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
-    _listTopics = getData();
+    checkInternet();
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    listener.cancel();
+  }
+
+  // SIMPLE CHECK TO SEE INTERNET CONNECTION
+  checkInternet() async {
+    // ACTIVELY LISTEN FOR STATUS UPDATES
+    listener = DataConnectionChecker().onStatusChange.listen((status) {
+      switch (status) {
+        case DataConnectionStatus.connected:
+          setState(() {
+            _listTopics = getData();
+          });
+          // print('Data connection is available.');
+          break;
+      }
+    });
   }
 
   @override
@@ -88,7 +112,8 @@ class _CategoriesListState extends State<CategoriesList> {
 
   onConfirmTopics() {
     setTopicsSeen(); //SET THE TOPICS SEEN VALUE
-    Navigator.pushReplacementNamed(context, 'dashboard'); // REDIRECTS TO THE DASHBOARD
+    Navigator.pushReplacementNamed(
+        context, 'dashboard'); // REDIRECTS TO THE DASHBOARD
   }
 
   setTopicsSeen() async {
