@@ -16,11 +16,6 @@ class _DashboardState extends State<Dashboard> {
   final List<Widget> _children = [YkaPosts(), YkaSearchPosts(), PostsList()];
 
   @override
-  void initState() {
-    super.initState();
-  }
-
-  @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: _children[_currentIndex],
@@ -39,11 +34,17 @@ class _DashboardState extends State<Dashboard> {
     return BottomNavigationBar(
       items: <BottomNavigationBarItem>[
         BottomNavigationBarItem(
-            icon: Icon(Icons.library_books), title: Text('Staff Picks')),
+          icon: Icon(Icons.library_books),
+          title: Text('Home'),
+        ),
         BottomNavigationBarItem(
-            icon: Icon(Icons.search), title: Text('Search')),
+          icon: Icon(Icons.search),
+          title: Text('Search'),
+        ),
         BottomNavigationBarItem(
-            icon: Icon(Icons.all_out), title: Text('Your Posts')),
+          icon: Icon(Icons.assignment),
+          title: Text('Your Posts'),
+        ),
       ],
       currentIndex: _currentIndex,
       fixedColor: Colors.red[900],
