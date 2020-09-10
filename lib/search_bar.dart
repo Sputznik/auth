@@ -1,8 +1,13 @@
-import 'package:auth/widgets/build_yka_post.dart';
-import 'package:flutter/material.dart';
+import 'dart:async';
 import 'package:auth/helpers/wp.dart';
-import 'package:auth/services/wp_posts_service.dart';
+import 'package:auth/widgets/internet_not_available.dart';
+import 'package:flutter/material.dart';
 import 'package:auth/models/wp_posts_model.dart';
+import 'package:auth/widgets/build_yka_post.dart';
+import 'package:auth/services/wp_posts_service.dart';
+import 'package:data_connection_checker/data_connection_checker.dart';
+import 'package:flutter/rendering.dart';
+import 'package:provider/provider.dart';
 
 class YkaSearchPosts extends StatefulWidget {
   @override
@@ -11,6 +16,8 @@ class YkaSearchPosts extends StatefulWidget {
 
 class _YkaSearchPostsState extends State<YkaSearchPosts> {
   Wordpress _wordpress = Wordpress.getInstance();
+
+  StreamSubscription<DataConnectionStatus> listener;
 
   List<WpPost> _posts = [];
 
@@ -21,6 +28,18 @@ class _YkaSearchPostsState extends State<YkaSearchPosts> {
   String emptyResult = 'Search Articles';
 
   bool loaderFlag = true;
+
+  @override
+  void initState() {
+    super.initState();
+    checkInternet(); // Check for internet connection
+  }
+
+  @override
+  void dispose() {
+    listener.cancel();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -47,27 +66,37 @@ class _YkaSearchPostsState extends State<YkaSearchPosts> {
 
   //Visible when search input is empty
   Widget isSearchEmpty() {
-    return Container(
-      alignment: Alignment.center,
-      child: Text(emptyResult),
+    return Visibility(
+      visible: Provider.of<DataConnectionStatus>(context) ==
+          DataConnectionStatus.connected,
+      child: Container(
+        alignment: Alignment.center,
+        child: Text(emptyResult),
+      ),
+      replacement: InternetNotAvailable(),
     );
   }
 
   //Visible when search input is not empty
   Widget searchNotEmpty() {
     return (searchQuery != '' && _posts.length == 0)
-        ? Container(
-            alignment: Alignment.center,
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
-                Text('Searching for $searchQuery'),
-                SizedBox(
-                  height: 10.0,
-                ),
-                CircularProgressIndicator()
-              ],
+        ? Visibility(
+            visible: Provider.of<DataConnectionStatus>(context) ==
+                DataConnectionStatus.connected,
+            child: Container(
+              alignment: Alignment.center,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  Text('Searching for $searchQuery'),
+                  SizedBox(
+                    height: 10.0,
+                  ),
+                  CircularProgressIndicator()
+                ],
+              ),
             ),
+            replacement: InternetNotAvailable(),
           )
         : ListView.builder(
             itemCount: _posts.length,
@@ -80,10 +109,26 @@ class _YkaSearchPostsState extends State<YkaSearchPosts> {
             });
   }
 
+  void showInSnackBar() {
+    Scaffold.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Check your internet connection and try again!'),
+      ),
+    );
+  }
+
   Widget searchInput() {
     return TextField(
+      onTap: _posts.length != 0 &&
+              Provider.of<DataConnectionStatus>(context) ==
+                  DataConnectionStatus.disconnected
+          ? showInSnackBar
+          : null,
+      readOnly: Provider.of<DataConnectionStatus>(context) ==
+          DataConnectionStatus.disconnected,
       cursorColor: Colors.white,
       enableSuggestions: true,
+      enableInteractiveSelection: false,
       style: TextStyle(
         color: Colors.white,
       ),
@@ -102,6 +147,21 @@ class _YkaSearchPostsState extends State<YkaSearchPosts> {
         userSearch();
       },
     );
+  }
+
+  // SIMPLE CHECK TO SEE INTERNET CONNECTION
+  checkInternet() async {
+    // ACTIVELY LISTEN FOR STATUS UPDATES
+    listener = DataConnectionChecker().onStatusChange.listen((status) {
+      switch (status) {
+        case DataConnectionStatus.connected:
+           if(searchQuery.isNotEmpty && _posts.isEmpty){
+             userSearch();
+           }
+          // print('Data connection is available.');
+          break;
+      }
+    });
   }
 
   //Returns posts based on user search input
