@@ -2,8 +2,6 @@ import 'package:auth/search_bar.dart';
 import 'package:auth/yka_posts.dart';
 import 'package:flutter/material.dart';
 import 'package:auth/archives_view.dart';
-import 'package:auth/yka-home.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 class Dashboard extends StatefulWidget {
   @override
@@ -20,6 +18,16 @@ class _DashboardState extends State<Dashboard> {
     return Scaffold(
       body: _children[_currentIndex],
       bottomNavigationBar: bottomNavBar(),
+      floatingActionButton: _currentIndex == 0 ? buildFloatingButton() : null,
+    );
+  }
+
+  buildFloatingButton() {
+    return FloatingActionButton.extended(
+      backgroundColor: Colors.red[900],
+      onPressed: () => onTappedBar(2),
+      icon: Icon(Icons.create),
+      label: Text('Start Writing'),
     );
   }
 
