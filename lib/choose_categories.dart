@@ -18,7 +18,6 @@ class _CategoriesListState extends State<CategoriesList> {
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     checkInternet();
   }
@@ -60,17 +59,37 @@ class _CategoriesListState extends State<CategoriesList> {
                 builder: (context, snapshot) {
                   if (snapshot.hasData) {
                     return Scaffold(
-                      body: ListView.builder(
+                      body: GridView.builder(
+                          scrollDirection: Axis.vertical,
+                          padding: EdgeInsets.symmetric(horizontal: 10.0),
+                          shrinkWrap: true,
+                          gridDelegate:
+                              SliverGridDelegateWithFixedCrossAxisCount(
+                            crossAxisCount: 2,
+                            crossAxisSpacing: 10.0,
+                            mainAxisSpacing: 0.0,
+                            childAspectRatio: 3,
+                          ),
                           itemCount: snapshot.data.length,
                           itemBuilder: (BuildContext context, int index) {
                             Topic topic = snapshot.data[index]; //Your item
-                            return CheckboxListTile(
-                              activeColor: Colors.red[900],
-                              value: _selectedTopics.contains(topic.id),
-                              onChanged: (bool selected) {
+                            return ChoiceChip(
+                              selectedColor: Colors.red[900],
+                              selected: _selectedTopics.contains(topic.id),
+                              onSelected: (bool selected) {
                                 _onCategorySelected(selected, topic.id);
                               },
-                              title: Text(topic.name),
+                              labelStyle: TextStyle(
+                                  color: _selectedTopics.contains(topic.id)
+                                      ? Colors.white
+                                      : Colors.black),
+                              label: Container(
+                                width: double.infinity / 2,
+                                child: Text(
+                                  topic.name,
+                                  textAlign: TextAlign.center,
+                                ),
+                              ),
                             );
                           }),
                     );
@@ -111,6 +130,7 @@ class _CategoriesListState extends State<CategoriesList> {
   }
 
   onConfirmTopics() {
+    //print(_selectedTopics);
     setTopicsSeen(); //SET THE TOPICS SEEN VALUE
     Navigator.pushReplacementNamed(
         context, 'dashboard'); // REDIRECTS TO THE DASHBOARD
