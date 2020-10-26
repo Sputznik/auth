@@ -26,7 +26,6 @@ class _UserDetailsState extends State<UserDetails> {
     return Scaffold(
       appBar: AppBar(
         title: Text(_displayName.toUpperCase()),
-        backgroundColor: Colors.red[900],
       ),
       body: Center(
         child: Column(
@@ -45,7 +44,6 @@ class _UserDetailsState extends State<UserDetails> {
             Container(
               height: 30.0,
               child: RaisedButton(
-                color: Colors.red[900],
                 onPressed: () {
                   _deleteAuthKey(context);
                   _deleteAppData(context);
@@ -53,9 +51,8 @@ class _UserDetailsState extends State<UserDetails> {
                 child: Text(
                   'Logout',
                   style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 16.0,
-                      fontWeight: FontWeight.bold),
+                    fontSize: 16.0,
+                  ),
                 ),
               ),
             )

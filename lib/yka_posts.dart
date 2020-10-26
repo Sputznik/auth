@@ -125,7 +125,6 @@ class _YkaPostsState extends State<YkaPosts> {
       appBar: AppBar(
         title: Text('Posts'),
         centerTitle: true,
-        backgroundColor: Colors.red[900],
       ),
       body: isLoading ? buildNetworkAware() : buildPostContainer(),
     );

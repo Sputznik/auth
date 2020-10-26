@@ -1,4 +1,3 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_html/flutter_html.dart';
 import 'package:cached_network_image/cached_network_image.dart';
@@ -21,11 +20,11 @@ class _YkaSinglePostState extends State<YkaSinglePost> {
           data['title'],
           style: TextStyle(
             fontSize: 16.0,
+            fontWeight: FontWeight.w500,
           ),
           maxLines: 2,
           overflow: TextOverflow.ellipsis,
         ),
-        backgroundColor: Colors.red[900],
         titleSpacing: 0.0,
       ),
       body: ListView(
@@ -76,6 +75,8 @@ class _YkaSinglePostState extends State<YkaSinglePost> {
     var destinationUrl = Uri.encodeFull(link);
     print(destinationUrl);
     await FlutterWebBrowser.openWebPage(
-        url: destinationUrl, androidToolbarColor: Colors.red[900]);
+      url: destinationUrl,
+      androidToolbarColor: Theme.of(context).primaryColor,
+    );
   }
 }

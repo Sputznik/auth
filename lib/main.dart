@@ -1,3 +1,4 @@
+import 'package:auth/app_theme.dart';
 import 'package:auth/choose_categories.dart';
 import 'package:auth/dashboard.dart';
 import 'package:auth/login.dart';
@@ -30,7 +31,9 @@ void main() {
       MultiProvider(
         providers: [
           StreamProvider<DataConnectionStatus>(create: (context) {
-            return DataConnectivityService().connectivityStreamController.stream;
+            return DataConnectivityService()
+                .connectivityStreamController
+                .stream;
           }),
           ChangeNotifierProvider(create: (context) => PostsCollection()),
         ],

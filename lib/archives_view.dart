@@ -30,7 +30,6 @@ class _PostsState extends State<PostsList> {
       key: scaffoldKey,
       appBar: AppBar(
         title: Text('Notes'),
-        backgroundColor: Colors.red[900],
         actions: <Widget>[
           IconButton(
             onPressed: () {
@@ -53,7 +52,6 @@ class _PostsState extends State<PostsList> {
         child: Icon(
           Icons.library_add,
         ),
-        backgroundColor: Colors.red[900],
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
       body: Container(

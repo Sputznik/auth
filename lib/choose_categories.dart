@@ -47,7 +47,6 @@ class _CategoriesListState extends State<CategoriesList> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Colors.red[900],
         centerTitle: true,
         title: Text('Follow Topics'),
       ),

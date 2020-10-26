@@ -24,7 +24,6 @@ class _DashboardState extends State<Dashboard> {
 
   buildFloatingButton() {
     return FloatingActionButton.extended(
-      backgroundColor: Colors.red[900],
       onPressed: () => onTappedBar(2),
       icon: Icon(Icons.create),
       label: Text('Start Writing'),
@@ -55,7 +54,6 @@ class _DashboardState extends State<Dashboard> {
         ),
       ],
       currentIndex: _currentIndex,
-      fixedColor: Colors.red[900],
       onTap: onTappedBar,
     );
   }

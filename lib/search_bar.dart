@@ -48,7 +48,6 @@ class _YkaSearchPostsState extends State<YkaSearchPosts> {
     return Scaffold(
       appBar: AppBar(
         title: searchInput(),
-        backgroundColor: Colors.red[900],
         leading: IconButton(
           icon: Icon(Icons.arrow_back),
           onPressed: () => Navigator.pushReplacementNamed(context, 'dashboard'),
@@ -128,23 +127,18 @@ class _YkaSearchPostsState extends State<YkaSearchPosts> {
           : null,
       readOnly: Provider.of<DataConnectionStatus>(context) ==
           DataConnectionStatus.disconnected,
-      cursorColor: Colors.white,
       enableSuggestions: true,
       enableInteractiveSelection: false,
-      style: TextStyle(
-        color: Colors.white,
-      ),
       controller: _controller,
       focusNode: _focusNode,
       decoration: InputDecoration(
-          hintText: 'Search Articles',
-          hintStyle: TextStyle(color: Colors.white),
-          border: InputBorder.none),
+          hintText: 'Search Articles', border: InputBorder.none),
       keyboardType: TextInputType.text,
       textInputAction: TextInputAction.search,
       onSubmitted: (val) {
         if (val.isEmpty) {
-          _focusNode.requestFocus(); // Prevents keyboard dismiss if search query is empty
+          _focusNode
+              .requestFocus(); // Prevents keyboard dismiss if search query is empty
           return;
         }
         setState(() {

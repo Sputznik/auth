@@ -50,7 +50,6 @@ class EditorPageState extends State<EditorPage> {
       child: Scaffold(
         appBar: AppBar(
             title: GestureDetector(child: Text(widget.post.title)),
-            backgroundColor: Colors.red[900],
             toolbarOpacity: 0.8,
             titleSpacing: 0,
             actions: <Widget>[PostOptionsMenu(post: widget.post, hideActions: ['edit', 'delete'],)]),
