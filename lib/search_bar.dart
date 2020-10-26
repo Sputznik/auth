@@ -23,6 +23,8 @@ class _YkaSearchPostsState extends State<YkaSearchPosts> {
 
   TextEditingController _controller = TextEditingController();
 
+  final FocusNode _focusNode = FocusNode();
+
   String searchQuery = '';
 
   String emptyResult = 'Search Articles';
@@ -133,6 +135,7 @@ class _YkaSearchPostsState extends State<YkaSearchPosts> {
         color: Colors.white,
       ),
       controller: _controller,
+      focusNode: _focusNode,
       decoration: InputDecoration(
           hintText: 'Search Articles',
           hintStyle: TextStyle(color: Colors.white),
@@ -140,6 +143,10 @@ class _YkaSearchPostsState extends State<YkaSearchPosts> {
       keyboardType: TextInputType.text,
       textInputAction: TextInputAction.search,
       onSubmitted: (val) {
+        if (val.isEmpty) {
+          _focusNode.requestFocus(); // Prevents keyboard dismiss if search query is empty
+          return;
+        }
         setState(() {
           searchQuery = val;
           loaderFlag = true;
@@ -155,9 +162,9 @@ class _YkaSearchPostsState extends State<YkaSearchPosts> {
     listener = DataConnectionChecker().onStatusChange.listen((status) {
       switch (status) {
         case DataConnectionStatus.connected:
-           if(searchQuery.isNotEmpty && _posts.isEmpty){
-             userSearch();
-           }
+          if (searchQuery.isNotEmpty && _posts.isEmpty) {
+            userSearch();
+          }
           // print('Data connection is available.');
           break;
       }
